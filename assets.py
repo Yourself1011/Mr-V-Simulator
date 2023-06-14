@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageTk
 
 textures = [
     Image.open("./assets/wall.png").convert("RGBA"), 
@@ -10,8 +10,11 @@ textures = [
 
 spriteTextures = [
     Image.open("./assets/unstamped_assignments.png").convert("RGBA"), 
+    Image.open("./assets/stamper.png").convert("RGBA"), 
     Image.open("./assets/stamp.png").convert("RGBA"), 
 ]
+
+stamper = ImageTk.PhotoImage(image=Image.open("./assets/stamper.png").resize((256, 256)))
 
 def deconstructImage(image):
     columns = []

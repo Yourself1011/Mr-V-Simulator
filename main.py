@@ -5,7 +5,7 @@ import map
 from map import debugMap, generateMap
 from math import sin, cos, radians
 from sprites import Sprite, Assignment
-from assets import textureMap
+from assets import textureMap, stamper
 from time import sleep, time
 from random import uniform
 import tkinter
@@ -39,6 +39,12 @@ def renderFrame(rays: list[Ray], f):
         #     fill="blue",
         #     width=1
         # )
+
+    # sprites
+    for i in Sprite.instances:
+        i.draw(player, rays, f)
+
+    Sprite.instances.sort(key=lambda x: x.relDistance, reverse=True)
         
     # crosshair
     screen.create_line(
@@ -58,11 +64,9 @@ def renderFrame(rays: list[Ray], f):
         tags="delete"
     )
 
-    # sprites
-    for i in Sprite.instances:
-        i.draw(player, rays, f)
-
-    Sprite.instances.sort(key=lambda x: x.relDistance, reverse=True)
+    # stamp in hand
+    if f - player.loadFrame > 10:
+        screen.create_image(screen.width, screen.height, anchor=tkinter.SE, image=stamper, tags="delete")
 
 def updateDebugScreen(f, start):
     screenD.create_text(10, 10, fill="white", anchor = tkinter.NW, text=f"{f / (time() - start) }\n{player.rot}\n{player.x}\n{player.y}", tags="delete")

@@ -4,6 +4,8 @@ from map import map
 
 debug = True
 
+root = Tk()
+
 screenD = None
 screenDScale = None
 if debug:
@@ -13,7 +15,6 @@ if debug:
     screenD.pack()
     screenDScale = screenD.length / (64 * len(map()))
 
-root = Tk()
 # root.configure(cursor="none")
 
 screen = Canvas(root, width=960, height=540, background="black")
