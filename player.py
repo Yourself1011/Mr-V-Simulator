@@ -61,12 +61,12 @@ class Player:
                 deltaY = cos(radians(angle)) * self.speed
                 deltaX = -sin(radians(angle)) * self.speed
 
-                if not map[round((self.y + deltaY) // 64)][round(self.x // 64)]:
+                if not map()[round((self.y + deltaY) // 64)][round(self.x // 64)]:
                     self.y += deltaY
-                if not map[round(self.y // 64)][round((self.x + deltaX) // 64)]:
+                if not map()[round(self.y // 64)][round((self.x + deltaX) // 64)]:
                     self.x += deltaX
 
         self.rot = (self.rot - self.toRotate * self.rotSpeed) % 360
             
 
-player = Player(mapInfo[1][0]*64 + 8, mapInfo[1][1]*64 + 32, 32, 90, 8, 15)
+player = Player(mapInfo()[1][0]*64 + 8, mapInfo()[1][1]*64 + 32, 32, 90, 8, 15)

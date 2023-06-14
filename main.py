@@ -4,14 +4,14 @@ from raycaster import Ray, rayToSlice
 import map
 from map import debugMap, generateMap
 from math import sin, cos, radians
-from sprites import Sprite
+from sprites import Sprite, Assignment
 from assets import textureMap
 from time import sleep, time
 from random import uniform
 import tkinter
 from eventHandlers import init as initEventHandlers
 
-def renderFrame(rays: list[Ray]):
+def renderFrame(rays: list[Ray], f):
     # playerHeightPercent = player.z / 64
     # baseline = screen.height - screen.height * playerHeightPercent
 
@@ -60,7 +60,9 @@ def renderFrame(rays: list[Ray]):
 
     # sprites
     for i in Sprite.instances:
-        i.draw(player, rays)
+        i.draw(player, rays, f)
+
+    Sprite.instances.sort(key=lambda x: x.relDistance, reverse=True)
 
 def updateDebugScreen(f, start):
     screenD.create_text(10, 10, fill="white", anchor = tkinter.NW, text=f"{f / (time() - start) }\n{player.rot}\n{player.x}\n{player.y}", tags="delete")
@@ -103,10 +105,20 @@ def startGame():
     initEventHandlers()
     f = 1
     start = time()
+
+    # Generate the map
+    map.localMap = generateMap(length=16, greediness=0.1, branchChance=0.75)
+    mapInfo = map.mapInfo()
+    player.x = mapInfo[1][0] * 64 + 8
+    player.y = mapInfo[1][1] * 64 + 32
+    
+    # Put enimies
+    for i in range(10):
+        Assignment(uniform(4, 8), 0)
     
     if debug:
-        gridLength = screenD.length / len(map.map)
-        for r, i in enumerate(map.map):
+        gridLength = screenD.length / len(map.map())
+        for r, i in enumerate(map.map()):
             for c, j in enumerate(i):
                 screenD.create_rectangle(
                     c * gridLength,
@@ -133,7 +145,7 @@ def startGame():
         
     while True:
         player.move()
-        renderFrame(player.rays)
+        renderFrame(player.rays, f)
 
         # debug screen
         if debug:
@@ -146,9 +158,9 @@ def startGame():
         if debug:
             screenD.delete("delete")
 
-        if f == 20:
-            map.mapInfo = generateMap(length=16, greediness=0.1, branchChance=0.75)
-            map.map = map.mapInfo[0]
+        # if f == 20:
+        #     map.localMap = generateMap(length=16, greediness=0.1, branchChance=0.75)
+        #     print("hi")
 
 root.after(100, startGame)
 root.mainloop()

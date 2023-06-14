@@ -31,7 +31,7 @@ class Ray:
                 
                 # print(indexY, indexX, runVert, totalRiseVert, totalRunVert, absAngle, degrees(innerAngle))
                 
-                if (indexYVert < 0 or indexYVert >= len(map)) or map[indexYVert][int(indexXVert)]:
+                if (indexYVert < 0 or indexYVert >= len(map())) or map()[indexYVert][int(indexXVert)]:
                     break
 
                 totalRunVert += runVert
@@ -57,7 +57,7 @@ class Ray:
                 # if absAngle < 90:
                 #     print(indexY, indexX, riseHor, totalRiseHor, totalRunHor, self.angle, absAngle)
                 
-                if (indexXHor < 0 or indexXHor >= len(map[0])) or map[int(indexYHor)][indexXHor]:
+                if (indexXHor < 0 or indexXHor >= len(map()[0])) or map()[int(indexYHor)][indexXHor]:
                     break
                     
                 totalRiseHor += riseHor
@@ -93,7 +93,7 @@ class Ray:
         return (
             self.length,
             totalRiseVert + originY if vertLength < horLength else totalRunHor + originX,
-            map[indexYVert][int(indexXVert)] if vertLength < horLength else map[int(indexYHor)][indexXHor]
+            map()[indexYVert][int(indexXVert)] if vertLength < horLength else map()[int(indexYHor)][indexXHor]
         )
 
 def rayToSlice(i, ray, player, distance, texture, hitLocation):

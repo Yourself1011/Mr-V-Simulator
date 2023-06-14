@@ -106,8 +106,9 @@ def getSurroundingTiles(x, y, boundX, boundY, map, invalid = None):
             invalidTiles += 1
     return (out, invalidTiles)
 
-mapInfo = generateMap(length=16, greediness=0.1, branchChance=0.75)
-map = mapInfo[0]
+localMap = generateMap(length=16, greediness=0.1, branchChance=0.75)
+mapInfo = lambda: localMap
+map = lambda: mapInfo()[0]
 
 debugMap = [
     "black",

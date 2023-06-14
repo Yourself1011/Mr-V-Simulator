@@ -11,7 +11,7 @@ if debug:
     screenD = Canvas(rootD, width=400, height=400, background="black")
     screenD.length = 400
     screenD.pack()
-    screenDScale = screenD.length / (64 * len(map))
+    screenDScale = screenD.length / (64 * len(map()))
 
 root = Tk()
 # root.configure(cursor="none")
