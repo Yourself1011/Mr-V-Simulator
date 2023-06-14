@@ -147,7 +147,6 @@ def startGame():
             screenD.delete("delete")
 
         if f == 20:
-            print("hi")
             map.mapInfo = generateMap(length=16, greediness=0.1, branchChance=0.75)
             map.map = map.mapInfo[0]
 
