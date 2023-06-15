@@ -106,14 +106,61 @@ def updateDebugScreen(f, start):
         tags = "delete"
     )
 
-def startGame():
+def deathScreen():
+    screen.create_rectangle(
+        0,
+        0,
+        screen.width,
+        screen.height,
+        fill="gray",
+        stipple="gray50",
+        tags="delete"
+    )
+    
+    screen.create_text(
+        screen.width / 2, 
+        screen.height / 4, 
+        anchor=tkinter.CENTER, 
+        fill="white", 
+        text=f"Game over!\nScore: {player.score}", 
+        justify="center", 
+        tags="delete", 
+        font=("Dejavu Sans", 40)
+    )
+
+    screen.create_rectangle(
+        screen.width / 2 - 200,
+        screen.height * 3 / 4 - 40,
+        screen.width / 2 + 200,
+        screen.height * 3 / 4 + 40,
+        fill="gray",
+        stipple="gray75",
+        tags=["delete", "startButton"]
+    )
+    screen.create_text(
+        screen.width / 2,
+        screen.height * 3 / 4,
+        text="Restart",
+        font=("Dejavu Sans", 40),
+        anchor=tkinter.CENTER,
+        fill="white",
+        tags=["delete", "startButton"]
+    )
+    
+
+def startGame(level = 0):
+    global f
     initEventHandlers()
+    Sprite.instances = []
+    player.dead = False
     f = 1
     start = time()
 
     # Generate the map
     map.localMap = generateMap(length=16, greediness=0.1, branchChance=0.75)
     mapInfo = map.mapInfo()
+    player.score = 0
+    player.loadFrame = 0
     player.x = mapInfo[1][0] * 64 + 8
     player.y = mapInfo[1][1] * 64 + 32
     
@@ -148,13 +195,15 @@ def startGame():
             fill="white"
         )
         
-    while True:
+    while not player.dead:
         if eventHandlers.mouse:
             eventHandlers.mouse = False
             if f - player.loadFrame > 10:
                 player.loadFrame = f
                 if player.target:
                     player.target.deathFrame = f
+                    player.score += 1
+                    
         player.target = None
         renderFrame(player.rays, f)
         player.move()
@@ -164,15 +213,21 @@ def startGame():
             updateDebugScreen(f, start)
         
         screen.update()
-        sleep(max(0, (start + 1 / fps * f) - time()))
-        screen.delete("delete")
-        f += 1
-        if debug:
-            screenD.delete("delete")
-
         # if f == 20:
-        #     map.localMap = generateMap(length=16, greediness=0.1, branchChance=0.75)
         #     print("hi")
+        #     break
+        if not player.dead:
+            sleep(max(0, (start + 1 / fps * f) - time()))
+            screen.delete("delete")
+            f += 1
+            if debug:
+                screenD.delete("delete")
 
-root.after(100, startGame)
+    deathScreen()
+
+def firstStart():
+    screen.tag_bind("startButton", "<Button-1>", startGame)
+    startGame()
+
+root.after(100, firstStart)
 root.mainloop()

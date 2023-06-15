@@ -83,7 +83,7 @@ class Sprite:
             hitLocation = self.relDistance * tan(radians(currentAngle + relAngle))
             
             if abs(ray.length) > abs(sliceDepth):
-                if index == floor((fov / 2) / (fov / (len(rays) - 1))):
+                if index == floor((fov / 2) / (fov / (len(rays) - 1))) and self.targetable:
                     player.target = self
                 
                 rayToSlice(index, ray, player, sliceDepth, spriteTextureMap[self.sprite], hitLocation + self.width / 2)
@@ -147,7 +147,8 @@ class Assignment(Sprite):
                     directions.append(("down", [self.coords[0], self.coords[1] + 1]))
                 if not mapArray[self.coords[1] - 1][self.coords[0]]:
                     directions.append(("up", [self.coords[0], self.coords[1] - 1]))
-    
+
+                # got stamped
                 if len(directions) > 1:
                     for i in directions:
                         if i[1] == self.lastSquare:
@@ -179,6 +180,10 @@ class Assignment(Sprite):
                     self.y = (self.lastSquare[1] + amount) * 64 + 32
                 case "up":
                     self.y = (self.lastSquare[1] - amount) * 64 + 32
+
+            # collision with player
+            if (self.x - 32 < player.x < self.x + 32) and (self.y - 32 < player.y < self.y + 32):
+                player.dead = True
 
         else:
             if f - self.deathFrame > 6:
