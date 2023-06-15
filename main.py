@@ -174,7 +174,7 @@ def deathScreen():
     )
     
 
-def startGame(level = 0):
+def startGame(level = 0, reset=False):
     global f
     Sprite.instances = []
     player.dead = False
@@ -191,7 +191,7 @@ def startGame(level = 0):
         branchChance = -1 / (level + 0.25) + 0.9
     )
     mapInfo = map.mapInfo()
-    if level == 0:
+    if reset:
         player.score = 0
     player.loadFrame = -10
     player.x = mapInfo[1][0] * 64 + 8
@@ -264,7 +264,7 @@ def startGame(level = 0):
 
 def firstStart():
     initEventHandlers()
-    screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(level=1))
+    screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(level=1, reset=True))
     startGame()
 
 root.after(100, firstStart)
