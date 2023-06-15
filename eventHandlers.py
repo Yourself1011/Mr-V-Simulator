@@ -21,6 +21,7 @@ def onKeyUp(e):
 
 def onMouseMove(e):
     player.toRotate = e.x / screen.width * 2 - 1
+    player.toRotate = player.toRotate ** 2 if player.toRotate > 0 else -(player.toRotate ** 2)
 
 def onMousePress(e):
     global mouse
