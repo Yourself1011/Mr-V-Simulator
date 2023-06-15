@@ -14,8 +14,6 @@ import eventHandlers
 from platform import system
 from eventHandlers import init as initEventHandlers, door
 
-osName = system()
-
 def renderFrame(rays: list[Ray], f, level):
     # playerHeightPercent = player.z / 64
     # baseline = screen.height - screen.height * playerHeightPercent
@@ -78,9 +76,9 @@ def renderFrame(rays: list[Ray], f, level):
         screen.width - 15,
         15,
         anchor=tkinter.NE,
-        text=f"Score: {player.score}\nLevel: {level}",
+        text=f"Score: {player.score}\nHigh Score: {sessionHighscore}\nLevel: {level}",
         justify=tkinter.RIGHT,
-        font=("Dejavu Sans", 40),
+        font=("Dejavu Sans", 30),
         fill="white",
         tags=["delete", "deleteOnDeath"]
     )
@@ -152,7 +150,7 @@ def deathScreen():
         screen.height / 4, 
         anchor=tkinter.CENTER, 
         fill="white", 
-        text=f"Game over!\nScore: {player.score}", 
+        text=f"Game over!\nScore: {player.score}\nHigh Score: {sessionHighscore}", 
         justify="center", 
         tags="delete", 
         font=("Dejavu Sans", 40)
@@ -179,7 +177,7 @@ def deathScreen():
     
 
 def startGame(level = 0, reset=False):
-    global f
+    global f, sessionHighscore
     Sprite.instances = []
     player.dead = False
     f = 1
@@ -241,19 +239,20 @@ def startGame(level = 0, reset=False):
                 deathStartAngle = player.rot
                 interval = player.deathSprite.relAngle
                 player.toRotate = 0
-
+                player.moveKeys = []
 
             if 5 < f - deadFrame <= 15:
                 player.rot = deathStartAngle + interval * ((f - 5 - deadFrame) / 10)
                 
             
-        if eventHandlers.mouse and not player.dead:
+        if eventHandlers.mouse and not player.dead and f != 1:
             eventHandlers.mouse = False
             if f - player.loadFrame > 10:
                 player.loadFrame = f
                 if player.target:
                     player.target.deathFrame = f
                     player.score += level
+                    sessionHighscore = max(sessionHighscore, player.score)
                     
         player.target = None
         renderFrame(player.rays, f, level)
@@ -279,7 +278,10 @@ def startGame(level = 0, reset=False):
             startGame(level + 1)
 
 def firstStart():
+    global osName, sessionHighscore
     initEventHandlers()
+    osName = system()
+    sessionHighscore = 0
     screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(level=1, reset=True))
     startGame(reset=True)
 

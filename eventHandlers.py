@@ -21,7 +21,7 @@ def onKeyDown(e):
             localDoor = True
 
 def onKeyUp(e):
-    if e.keysym in angles.keys():
+    if e.keysym.lower() in angles.keys() and e.keysym.lower() in player.moveKeys:
         player.moveKeys.remove(e.keysym)
 
     if e.keysym in ["Shift_L", "Shift_R"]:
