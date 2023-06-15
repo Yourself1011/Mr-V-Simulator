@@ -265,7 +265,7 @@ def startGame(level = 0, reset=False):
 def firstStart():
     initEventHandlers()
     screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(level=1, reset=True))
-    startGame()
+    startGame(reset=True)
 
 root.after(100, firstStart)
 root.mainloop()
