@@ -11,7 +11,10 @@ from time import sleep, time
 from random import uniform
 import tkinter
 import eventHandlers
+from platform import system
 from eventHandlers import init as initEventHandlers, door
+
+osName = system()
 
 def renderFrame(rays: list[Ray], f, level):
     # playerHeightPercent = player.z / 64
@@ -133,15 +136,16 @@ def updateDebugScreen(f, start):
 
 def deathScreen():
     screen.delete("deleteOnDeath")
-    screen.create_rectangle(
-        0,
-        0,
-        screen.width,
-        screen.height,
-        fill="gray",
-        stipple="gray50",
-        tags="delete"
-    )
+    if osName != "Darwin":
+        screen.create_rectangle(
+            0,
+            0,
+            screen.width,
+            screen.height,
+            fill="gray",
+            stipple="gray50",
+            tags="delete"
+        )
     
     screen.create_text(
         screen.width / 2, 
@@ -179,6 +183,7 @@ def startGame(level = 0, reset=False):
     Sprite.instances = []
     player.dead = False
     f = 1
+    deadFrame = 0
     start = time()
 
     if debug:
@@ -228,8 +233,21 @@ def startGame(level = 0, reset=False):
             fill="white"
         )
         
-    while not player.dead:
-        if eventHandlers.mouse:
+    while True:
+        if player.dead:
+
+            if not deadFrame:
+                deadFrame = f
+                deathStartAngle = player.rot
+                interval = player.deathSprite.relAngle
+                player.toRotate = 0
+
+
+            if 5 < f - deadFrame <= 15:
+                player.rot = deathStartAngle + interval * ((f - 5 - deadFrame) / 10)
+                
+            
+        if eventHandlers.mouse and not player.dead:
             eventHandlers.mouse = False
             if f - player.loadFrame > 10:
                 player.loadFrame = f
@@ -240,27 +258,25 @@ def startGame(level = 0, reset=False):
         player.target = None
         renderFrame(player.rays, f, level)
         player.move()
+        
+        if player.dead:
+            deathScreen()
 
         # debug screen
         if debug:
             updateDebugScreen(f, start)
         
         screen.update()
-        # if f == 20:
-        #     print("hi")
-        #     break
-        if not player.dead:
-            sleep(max(0, (start + 1 / fps * f) - time()))
-            screen.delete("delete")
-            f += 1
-            if debug:
-                screenD.delete("delete")
+        
+        sleep(max(0, (start + 1 / fps * f) - time()))
+        screen.delete("delete")
+        f += 1
+        if debug:
+            screenD.delete("delete")
 
-        if door():
+        if door() and not player.dead:
             eventHandlers.localDoor = False
             startGame(level + 1)
-
-    deathScreen()
 
 def firstStart():
     initEventHandlers()

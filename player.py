@@ -23,7 +23,9 @@ class Player:
     loadFrame: int = 0
     target: Sprite = None
     dead: bool = False
+    deathRot: float = 0
     score: int = 0
+    deathSprite: Sprite = None
     def __post_init__(self):
         self.rays = [Ray(fov / screen.width * i - fov / 2) for i in range(0, screen.width, verticalPrecision)]
         self.moveKeys = []
