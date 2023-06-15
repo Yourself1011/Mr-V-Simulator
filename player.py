@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from raycaster import Ray
 from consts import fov, screen, verticalPrecision
+from sprites import Sprite
 from math import cos, sin, radians
 from map import map, mapInfo
 
@@ -20,6 +21,7 @@ class Player:
     speed: float
     rotSpeed: float
     loadFrame: int = 0
+    target: Sprite = None
     def __post_init__(self):
         self.rays = [Ray(fov / screen.width * i - fov / 2) for i in range(0, screen.width, verticalPrecision)]
         self.moveKeys = []

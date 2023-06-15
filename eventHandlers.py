@@ -1,6 +1,7 @@
 from consts import screen
 from player import player, angles
 
+mouse = False
 
 def onKeyDown(e):
     if e.keysym in angles.keys() and e.keysym not in player.moveKeys:
@@ -21,8 +22,12 @@ def onKeyUp(e):
 def onMouseMove(e):
     player.toRotate = e.x / screen.width * 2 - 1
 
+def onMousePress(e):
+    global mouse
+    mouse = True
+
 def init():
     screen.bind("<Key>", onKeyDown)
     screen.bind("<KeyRelease>", onKeyUp)
     screen.bind("<Motion>", onMouseMove)
-
+    screen.bind("<Button-1>", onMousePress)

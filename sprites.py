@@ -3,7 +3,7 @@ from math import atan, degrees, sqrt, radians, cos, floor, tan
 from assets import spriteTextureMap
 from raycaster import rayToSlice
 from map import mapInfo, map
-from random import choice, uniform
+from random import choice
 
 class Sprite:
     instances = []
@@ -13,6 +13,7 @@ class Sprite:
         self.width = width
         self.sprite = sprite
         self.relDistance = 0
+        self.targetable = False
         self.__class__.instances.append(self)
         
     def draw(self, player, rays):
@@ -53,6 +54,11 @@ class Sprite:
         if relAngle > 180:
             relAngle = relAngle - 360
 
+        # spread = atan(self.width / 2 / self.relDistance)
+        # if self.targetable and -spread < relAngle < spread and (not player.target or self.relDistance < player.target.relDistance):
+        #     player.targets = self
+        #     print("target acquired")
+
         interval = fov / len(rays)
 
         currentAngle = max(min(fov / 2, degrees(atan(self.width / 2 / self.relDistance)) - relAngle), -fov / 2)
@@ -77,6 +83,9 @@ class Sprite:
             hitLocation = self.relDistance * tan(radians(currentAngle + relAngle))
             
             if abs(ray.length) > abs(sliceDepth):
+                if index == floor((fov / 2) / (fov / (len(rays) - 1))):
+                    player.target = self
+                
                 rayToSlice(index, ray, player, sliceDepth, spriteTextureMap[self.sprite], hitLocation + self.width / 2)
 
                 if debug:
@@ -118,55 +127,66 @@ class Assignment(Sprite):
         self.speed = speed
         self.direction = None
         self.moveStartFrame = f
+        self.deathFrame = None
         
         super().__init__(*[i * 64 + 32 for i in self.coords], 64, 1)
+        self.targetable = True
 
     def draw(self, player, rays, f):
-        # move
-        if self.direction == None or f - self.moveStartFrame > self.speed:
-            # decide a new direction to go
-            directions = []
-            mapArray = map()
-            if not mapArray[self.coords[1]][self.coords[0] + 1]:
-                directions.append(("right", [self.coords[0] + 1, self.coords[1]]))
-            if not mapArray[self.coords[1]][self.coords[0] - 1]:
-                directions.append(("left", [self.coords[0] - 1, self.coords[1]]))
-            if not mapArray[self.coords[1] + 1][self.coords[0]]:
-                directions.append(("down", [self.coords[0], self.coords[1] + 1]))
-            if not mapArray[self.coords[1] - 1][self.coords[0]]:
-                directions.append(("up", [self.coords[0], self.coords[1] - 1]))
-
-            if len(directions) > 1:
-                for i in directions:
-                    if i[1] == self.lastSquare:
-                        directions.remove(i)
-                        break
-
-            # print(directions)
-            
-            self.lastSquare = self.coords.copy()
-            self.direction = choice(directions)[0]
+        if not self.deathFrame:
+            # move
+            if (self.direction == None or f - self.moveStartFrame > self.speed):
+                # decide a new direction to go
+                directions = []
+                mapArray = map()
+                if not mapArray[self.coords[1]][self.coords[0] + 1]:
+                    directions.append(("right", [self.coords[0] + 1, self.coords[1]]))
+                if not mapArray[self.coords[1]][self.coords[0] - 1]:
+                    directions.append(("left", [self.coords[0] - 1, self.coords[1]]))
+                if not mapArray[self.coords[1] + 1][self.coords[0]]:
+                    directions.append(("down", [self.coords[0], self.coords[1] + 1]))
+                if not mapArray[self.coords[1] - 1][self.coords[0]]:
+                    directions.append(("up", [self.coords[0], self.coords[1] - 1]))
+    
+                if len(directions) > 1:
+                    for i in directions:
+                        if i[1] == self.lastSquare:
+                            directions.remove(i)
+                            break
+    
+                # print(directions)
+                
+                self.lastSquare = self.coords.copy()
+                self.direction = choice(directions)[0]
+                match self.direction:
+                    case "right":
+                        self.coords[0] += 1
+                    case "left":
+                        self.coords[0] -= 1
+                    case "down":
+                        self.coords[1] += 1
+                    case "up":
+                        self.coords[1] -= 1
+                self.moveStartFrame = f - 1
+    
+            amount = (f - self.moveStartFrame) / self.speed
             match self.direction:
                 case "right":
-                    self.coords[0] += 1
+                    self.x = (self.lastSquare[0] + amount) * 64 + 32
                 case "left":
-                    self.coords[0] -= 1
+                    self.x = (self.lastSquare[0] - amount) * 64 + 32
                 case "down":
-                    self.coords[1] += 1
+                    self.y = (self.lastSquare[1] + amount) * 64 + 32
                 case "up":
-                    self.coords[1] -= 1
-            self.moveStartFrame = f - 1
+                    self.y = (self.lastSquare[1] - amount) * 64 + 32
 
-        amount = (f - self.moveStartFrame) / self.speed
-        match self.direction:
-            case "right":
-                self.x = (self.lastSquare[0] + amount) * 64 + 32
-            case "left":
-                self.x = (self.lastSquare[0] - amount) * 64 + 32
-            case "down":
-                self.y = (self.lastSquare[1] + amount) * 64 + 32
-            case "up":
-                self.y = (self.lastSquare[1] - amount) * 64 + 32
+        else:
+            if f - self.deathFrame > 6:
+                self.instances.remove(self)
+            elif f - self.deathFrame > 3:
+                self.sprite = 3
+            else:
+                self.sprite = 2
         
         super().draw(player, rays)
 

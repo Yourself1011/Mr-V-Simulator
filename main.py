@@ -9,6 +9,7 @@ from assets import textureMap, stamper
 from time import sleep, time
 from random import uniform
 import tkinter
+import eventHandlers
 from eventHandlers import init as initEventHandlers
 
 def renderFrame(rays: list[Ray], f):
@@ -148,8 +149,15 @@ def startGame():
         )
         
     while True:
-        player.move()
+        if eventHandlers.mouse:
+            eventHandlers.mouse = False
+            if f - player.loadFrame > 10:
+                player.loadFrame = f
+                if player.target:
+                    player.target.deathFrame = f
+        player.target = None
         renderFrame(player.rays, f)
+        player.move()
 
         # debug screen
         if debug:
