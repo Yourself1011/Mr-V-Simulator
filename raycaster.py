@@ -69,10 +69,10 @@ class Ray:
         if debug:
             if vertLength < horLength:
                 screenD.create_line(
-                    originX * screenDScale,
-                    originY * screenDScale,
-                    (originX + totalRunVert) * screenDScale,
-                    (originY + totalRiseVert) * screenDScale,
+                    originX * screenDScale(),
+                    originY * screenDScale(),
+                    (originX + totalRunVert) * screenDScale(),
+                    (originY + totalRiseVert) * screenDScale(),
                     fill="purple",
                     tags="delete"
                 )
@@ -80,10 +80,10 @@ class Ray:
                 self.endY = (originY + totalRiseVert)
             else:
                 screenD.create_line(
-                            originX * screenDScale,
-                            originY * screenDScale,
-                            (originX + totalRunHor) * screenDScale,
-                            (originY + totalRiseHor) * screenDScale,
+                            originX * screenDScale(),
+                            originY * screenDScale(),
+                            (originX + totalRunHor) * screenDScale(),
+                            (originY + totalRiseHor) * screenDScale(),
                             fill="red",
                             tags="delete"
                         )

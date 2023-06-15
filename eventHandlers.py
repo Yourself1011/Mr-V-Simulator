@@ -1,15 +1,24 @@
 from consts import screen
 from player import player, angles
+from math import floor
+from map import mapInfo
 
 mouse = False
+localDoor = False
+door = lambda: localDoor
 
 def onKeyDown(e):
-    if e.keysym in angles.keys() and e.keysym not in player.moveKeys:
-        player.moveKeys.append(e.keysym)
+    global localDoor
+    if e.keysym.lower() in angles.keys() and e.keysym not in player.moveKeys:
+        player.moveKeys.append(e.keysym.lower())
 
     if e.keysym in ["Shift_L", "Shift_R"]:
         player.crouch = True
         player.z -= 16
+
+    if e.keysym.lower() == "e":
+        if round(player.x / 64) == mapInfo()[2][0] + 1 and floor(player.y / 64) == mapInfo()[2][1]:
+            localDoor = True
 
 def onKeyUp(e):
     if e.keysym in angles.keys():

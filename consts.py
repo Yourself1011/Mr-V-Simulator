@@ -8,12 +8,14 @@ root = Tk()
 
 screenD = None
 screenDScale = None
+localScreenDScale = None
 if debug:
     rootD = Toplevel()
     screenD = Canvas(rootD, width=400, height=400, background="black")
     screenD.length = 400
     screenD.pack()
-    screenDScale = screenD.length / (64 * len(map()))
+    localScreenDScale = screenD.length / (64 * len(map()))
+    screenDScale = lambda: localScreenDScale
 
 # root.configure(cursor="none")
 

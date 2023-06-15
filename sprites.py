@@ -19,10 +19,10 @@ class Sprite:
     def draw(self, player, rays):
         if debug:
             screenD.create_oval(
-                self.x * screenDScale - self.width * screenDScale / 2,
-                self.y * screenDScale - self.width * screenDScale / 2,
-                self.x * screenDScale + self.width * screenDScale / 2,
-                self.y * screenDScale + self.width * screenDScale / 2,
+                self.x * screenDScale() - self.width * screenDScale() / 2,
+                self.y * screenDScale() - self.width * screenDScale() / 2,
+                self.x * screenDScale() + self.width * screenDScale() / 2,
+                self.y * screenDScale() + self.width * screenDScale() / 2,
                 fill="green",
                 tags="delete"
             )
@@ -90,19 +90,19 @@ class Sprite:
 
                 if debug:
                     screenD.create_line(
-                        player.x * screenDScale,
-                        player.y * screenDScale,
-                        ray.endX * screenDScale,
-                        ray.endY * screenDScale,
+                        player.x * screenDScale(),
+                        player.y * screenDScale(),
+                        ray.endX * screenDScale(),
+                        ray.endY * screenDScale(),
                         fill="white",
                         tags="delete"
                     )
                     
                     screenD.create_oval(
-                        self.x * screenDScale - self.width * screenDScale / 2,
-                        self.y * screenDScale - self.width * screenDScale / 2,
-                        self.x * screenDScale + self.width * screenDScale / 2,
-                        self.y * screenDScale + self.width * screenDScale / 2,
+                        self.x * screenDScale() - self.width * screenDScale() / 2,
+                        self.y * screenDScale() - self.width * screenDScale() / 2,
+                        self.x * screenDScale() + self.width * screenDScale() / 2,
+                        self.y * screenDScale() + self.width * screenDScale() / 2,
                         fill="orange",
                         tags="delete"
                     )
@@ -110,10 +110,10 @@ class Sprite:
             # else:
             #     if debug:
             #         screenD.create_line(
-            #             player.x * screenDScale,
-            #             player.y * screenDScale,
-            #             ray.endX * screenDScale,
-            #             ray.endY * screenDScale,
+            #             player.x * screenDScale(),
+            #             player.y * screenDScale(),
+            #             ray.endX * screenDScale(),
+            #             ray.endY * screenDScale(),
             #             fill="orange",
             #             tags="delete"
             #         )
@@ -122,7 +122,11 @@ class Sprite:
 
 class Assignment(Sprite):
     def __init__(self, speed, f):
-        self.lastSquare = list(choice(mapInfo()[3]))
+        startTile = mapInfo()[1]
+        self.lastSquare = list(choice(list(filter(
+            lambda x: not (-2 < x[0] - startTile[0] < 2 and -2 < x[1] - startTile[1] < 2), 
+            mapInfo()[3]
+        ))))
         self.coords = self.lastSquare.copy()
         self.speed = speed
         self.direction = None
@@ -174,12 +178,16 @@ class Assignment(Sprite):
             match self.direction:
                 case "right":
                     self.x = (self.lastSquare[0] + amount) * 64 + 32
+                    self.y = self.coords[1] * 64 + 32
                 case "left":
                     self.x = (self.lastSquare[0] - amount) * 64 + 32
+                    self.y = self.coords[1] * 64 + 32
                 case "down":
                     self.y = (self.lastSquare[1] + amount) * 64 + 32
+                    self.x = self.coords[0] * 64 + 32
                 case "up":
                     self.y = (self.lastSquare[1] - amount) * 64 + 32
+                    self.x = self.coords[0] * 64 + 32
 
             # collision with player
             if (self.x - 32 < player.x < self.x + 32) and (self.y - 32 < player.y < self.y + 32):

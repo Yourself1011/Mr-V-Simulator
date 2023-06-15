@@ -10,7 +10,7 @@ textures = [
 
 spriteTextures = [
     Image.open("./assets/unstamped_assignments.png").convert("RGBA"), 
-    Image.open("./assets/stamper.png").convert("RGBA"), 
+    Image.open("./assets/stamper_assignment.png").convert("RGBA"), 
     Image.open("./assets/stamp.png").convert("RGBA"), 
 ]
 
