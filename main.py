@@ -9,6 +9,7 @@ from sprites import Sprite, Assignment
 from assets import textureMap, stamper
 from time import sleep, time
 from random import uniform
+from replit import db
 import tkinter
 import eventHandlers
 from platform import system
@@ -56,7 +57,7 @@ def renderFrame(rays: list[Ray], f, level):
         screen.width // 2,
         screen.height // 2 + 10,
         fill="white",
-        tags="delete"
+        tags=["delete", "deleteOnDeath"]
     )
     screen.create_line(
         screen.width // 2 - 10,
@@ -64,7 +65,7 @@ def renderFrame(rays: list[Ray], f, level):
         screen.width // 2 + 10,
         screen.height // 2,
         fill="white",
-        tags="delete"
+        tags=["delete", "deleteOnDeath"]
     )
 
     # stamp in hand
@@ -94,6 +95,74 @@ def renderFrame(rays: list[Ray], f, level):
             anchor=tkinter.S,
             tags=["delete", "deleteOnDeath"]
         )
+
+def scoreboard(x, y, index, nameLength = 15, firstTime = False, inputScore=None, **kwargs):
+    scores = highscores[index:index+5]
+    screen.create_rectangle(
+        x,
+        y - 12 * 5,
+        x + (nameLength + 2) * 12 + 6,
+        y + 12 * 5,
+        fill="",
+        outline="",
+        tags=["scoreboard", "delete"]
+    )
+
+    output = []
+    for x, i in enumerate(scores):
+        length = nameLength - len(str(x + index + 1))
+        output.append(f"{x + index + 1}. {i[0] if len(i[0]) <= length else i[0][:length-3] + '...'}{' ' * (length - len(i[0]))}  {i[1]}")
+
+    output = "\n".join(output)
+    
+    screen.create_text(
+        x,
+        y,
+        text="Leaderboard:\n" + output,
+        anchor=tkinter.W,
+        font=("Dejavu Sans Mono", 12),
+        tags=["scoreboard", "delete"],
+        **kwargs
+    )
+
+    if inputScore and not submitted:
+        if firstTime:
+            screen.create_window(x + 55, y + 12 * 6, anchor=tkinter.W, window=nameInput, tags="score")
+        screen.create_text(
+            x,
+            y + 12 * 6,
+            anchor=tkinter.W,
+            text="Name: ",
+            font=("Dejavu Sans Mono", 12),
+            fill="white",
+            tags="score"
+        )
+        screen.create_rectangle(
+            x + 190,
+            y + 12 * 6 - 12,
+            x + 260,
+            y + 12 * 6 + 12,
+            fill="gray75",
+            stipple="gray75",
+            tags=["scorebutton", "score"]
+        )
+        screen.create_text(
+            x + 225,
+            y + 12 * 6,
+            text="Submit",
+            fill="white",
+            font=("Dejavu Sans", 11),
+            tags=["scorebutton", "score"]
+        )
+
+        screen.tag_bind("scorebutton", "<Button-1>", lambda e: submitScore(inputScore))
+
+def submitScore(inputScore):
+    global highscores, submitted
+    db["highscores"].append((nameInput.get(), inputScore))
+    highscores = sorted(db["highscores"], key=lambda x: x[1], reverse=True)
+    screen.delete("score")
+    submitted=True
 
 def updateDebugScreen(f, start):
     screenD.create_text(10, 10, fill="white", anchor = tkinter.NW, text=f"{f / (time() - start) }\n{player.rot}\n{player.x}\n{player.y}", tags="delete")
@@ -132,18 +201,17 @@ def updateDebugScreen(f, start):
         tags = "delete"
     )
 
-def deathScreen():
+def deathScreen(index, firstTime = False):
     screen.delete("deleteOnDeath")
-    if osName != "Darwin":
-        screen.create_rectangle(
-            0,
-            0,
-            screen.width,
-            screen.height,
-            fill="gray",
-            stipple="gray50",
-            tags="delete"
-        )
+    screen.create_rectangle(
+        0,
+        0,
+        screen.width,
+        screen.height,
+        fill="black",
+        stipple="gray75",
+        tags="delete"
+    )
     
     screen.create_text(
         screen.width / 2, 
@@ -153,15 +221,15 @@ def deathScreen():
         text=f"Game over!\nScore: {player.score}\nHigh Score: {sessionHighscore}", 
         justify="center", 
         tags="delete", 
-        font=("Dejavu Sans", 40)
+        font=("Dejavu Sans", 36)
     )
 
     screen.create_rectangle(
         screen.width / 2 - 200,
-        screen.height * 3 / 4 - 40,
+        screen.height * 3 / 4 - 36,
         screen.width / 2 + 200,
-        screen.height * 3 / 4 + 40,
-        fill="gray",
+        screen.height * 3 / 4 + 36,
+        fill="gray75",
         stipple="gray75",
         tags=["delete", "startButton"]
     )
@@ -169,20 +237,33 @@ def deathScreen():
         screen.width / 2,
         screen.height * 3 / 4,
         text="Restart",
-        font=("Dejavu Sans", 40),
+        font=("Dejavu Sans", 36),
         anchor=tkinter.CENTER,
         fill="white",
         tags=["delete", "startButton"]
     )
+
+    scoreboard(25, screen.height / 4, index, firstTime=firstTime, inputScore=player.score, fill="white")
     
+def updateIndex(amount):
+    global index
+    index = max(min(index + amount, len(highscores) - 5), 0)
 
 def startGame(level = 0, reset=False):
-    global f, sessionHighscore
+    global f, sessionHighscore, submitted, index
+    screen.delete("all")
     Sprite.instances = []
     player.dead = False
+    submitted = False
     f = 1
     deadFrame = 0
+    index = 0
+
+    
     start = time()
+
+    screen.tag_bind("scoreboard", "<Button-4>", lambda e: updateIndex(-1))
+    screen.tag_bind("scoreboard", "<Button-5>", lambda e: updateIndex(1))
 
     if debug:
         consts.localScreenDScale = screenD.length / (64 * round(5 * log(level + 0.1, 10) + 13))
@@ -259,7 +340,10 @@ def startGame(level = 0, reset=False):
         player.move()
         
         if player.dead:
-            deathScreen()
+            if not deadFrame:
+                deathScreen(index, firstTime = True)
+            else:
+                deathScreen(index)
 
         # debug screen
         if debug:
@@ -278,10 +362,17 @@ def startGame(level = 0, reset=False):
             startGame(level + 1)
 
 def firstStart():
-    global osName, sessionHighscore
+    global osName, sessionHighscore, highscores, nameInput
+    if "highscores" not in db.keys():
+        db["highscores"] = [
+            (" ", 0)
+        ]
+    
     initEventHandlers()
     osName = system()
     sessionHighscore = 0
+    highscores = sorted(db["highscores"], key=lambda x: x[1], reverse=True)
+    nameInput = tkinter.Entry(root, width=15)
     screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(level=1, reset=True))
     startGame(reset=True)
 
