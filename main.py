@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from player import player
 import consts
 from consts import screen, root, debug, screenD, screenDScale, fps, fov
