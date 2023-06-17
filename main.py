@@ -140,15 +140,27 @@ def updateDebugScreen(f, start):
 
 def scoreboard(x, y, index, nameLength = 15, firstTime = False, inputScore=None, **kwargs):
     scores = highscores[index:index+5]
-    screen.create_rectangle(
-        x,
-        y - 12 * 5,
-        x + (nameLength + 2) * 12 + 6,
-        y + 12 * 5,
-        fill="",
-        outline="",
-        tags=["scoreboard", "delete"]
-    )
+    if osName == "Darwin":
+        screen.create_rectangle(
+            x,
+            y - 12 * 5,
+            x + (nameLength + 2) * 12 + 6,
+            y + 12 * 5,
+            fill="gray50",
+            outline="",
+            tags=["scoreboard", "delete"]
+        )
+
+    else:
+        screen.create_rectangle(
+            x,
+            y - 12 * 5,
+            x + (nameLength + 2) * 12 + 6,
+            y + 12 * 5,
+            fill="",
+            outline="",
+            tags=["scoreboard", "delete"]
+        )
 
     output = []
     for j, i in enumerate(scores):
@@ -210,15 +222,25 @@ def submitScore(inputScore):
     
 def deathScreen(index, firstTime = False):
     screen.delete("deleteOnDeath")
-    screen.create_rectangle(
-        0,
-        0,
-        screen.width,
-        screen.height,
-        fill="black",
-        stipple="gray75",
-        tags="delete"
-    )
+    if osName == "Darwin":
+        screen.create_rectangle(
+            screen.width / 2 - 175,
+            screen.height / 4 - 100,
+            screen.width / 2 + 175,
+            screen.height / 4 + 100,
+            fill="gray50"
+        )
+    
+    else: 
+        screen.create_rectangle(
+            0,
+            0,
+            screen.width,
+            screen.height,
+            fill="black",
+            stipple="gray75",
+            tags="delete"
+        )
     
     screen.create_text(
         screen.width / 2, 
