@@ -138,7 +138,7 @@ class Assignment(Sprite):
         self.targetable = True
 
     def draw(self, player, rays, f):
-        if not player.dead:
+        if not player.dead and f > 10:
             if not self.deathFrame:
                 # move
                 if (self.direction == None or f - self.moveStartFrame > self.speed):
