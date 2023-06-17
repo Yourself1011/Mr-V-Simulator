@@ -2,7 +2,7 @@ from tkinter import Toplevel, Canvas, Tk
 from math import tan, radians
 from map import map
 
-debug = True
+debug = False
 
 root = Tk()
 

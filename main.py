@@ -12,11 +12,16 @@ from sprites import Sprite, Assignment
 from assets import textureMap, stamper
 from time import sleep, time
 from random import uniform
-from replit import db
 import tkinter
 import eventHandlers
 from platform import system
 from eventHandlers import init as initEventHandlers, door
+
+try: 
+    from replit import db
+except Exception as e:
+    print(str(e) + "\nCouldn't connect to database, running in offline mode")
+    db = {"highscore": ("", 0)}
 
 def renderFrame(rays: list[Ray], f, level):
     # playerHeightPercent = player.z / 64
