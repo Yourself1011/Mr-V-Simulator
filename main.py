@@ -272,7 +272,9 @@ def startGame(level = 0, reset=False):
     start = time()
 
     if osName in ["Darwin"]:
-        screen.tag_bind("scoreboard", "<MouseWheel>", lambda e: updateIndex(-e.D))
+        screen.bind("scoreboard", "<MouseWheel>", lambda e: updateIndex(-e.delta))
+    elif osName in ["Windows"]:
+        screen.bind("scoreboard", "<MouseWheel>", lambda e: updateIndex(-e.delta / 120))
     else:
         screen.tag_bind("scoreboard", "<Button-4>", lambda e: updateIndex(-1))
         screen.tag_bind("scoreboard", "<Button-5>", lambda e: updateIndex(1))
