@@ -6,9 +6,10 @@ from map import mapInfo
 mouse = False
 localDoor = False
 door = lambda: localDoor
+pause = False
 
 def onKeyDown(e):
-    global localDoor
+    global localDoor, pause
     if e.keysym.lower() in angles.keys() and e.keysym not in player.moveKeys and not player.dead:
         player.moveKeys.append(e.keysym.lower())
 
@@ -19,6 +20,9 @@ def onKeyDown(e):
     if e.keysym.lower() == "e" and not player.dead:
         if round(player.x / 64) == mapInfo()[2][0] + 1 and floor(player.y / 64) == mapInfo()[2][1]:
             localDoor = True
+
+    if e.keysym.lower() in ["p", "escape"]:
+        pause = not pause
 
 def onKeyUp(e):
     if e.keysym.lower() in angles.keys() and e.keysym.lower() in player.moveKeys:
