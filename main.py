@@ -470,7 +470,7 @@ def firstStart():
             ]
     except Exception as e:
         print(str(e) + "\nCouldn't connect to database, running in offline mode")
-        db = {"highscores": ("", 0)}
+        db = {"highscores": [("", 0)]}
     
     initEventHandlers()
     osName = system()
