@@ -284,6 +284,58 @@ def updateIndex(amount):
     global index
     index = max(min(index + amount, len(highscores) - 5), 0)
 
+def pauseMenu(index):
+    if osName == "Darwin":
+        screen.create_rectangle(
+            screen.width / 2 - 175,
+            screen.height / 4 - 100,
+            screen.width / 2 + 175,
+            screen.height / 4 + 100,
+            fill="gray50"
+        )
+    
+    else: 
+        screen.create_rectangle(
+            0,
+            0,
+            screen.width,
+            screen.height,
+            fill="black",
+            stipple="gray75",
+            tags="delete"
+        )
+    
+    screen.create_text(
+        screen.width / 2, 
+        screen.height / 4, 
+        anchor=tkinter.CENTER, 
+        fill="white", 
+        text=f"Game paused\nScore: {player.score}\nHigh Score: {sessionHighscore}", 
+        justify="center", 
+        tags="delete", 
+        font=("Dejavu Sans", 36)
+    )
+
+    screen.create_rectangle(
+        screen.width / 2 - 200,
+        screen.height * 3 / 4 - 36,
+        screen.width / 2 + 200,
+        screen.height * 3 / 4 + 36,
+        fill="gray75",
+        stipple="gray75",
+        tags=["delete", "resumeButton"]
+    )
+    screen.create_text(
+        screen.width / 2,
+        screen.height * 3 / 4,
+        text="Resume",
+        font=("Dejavu Sans", 36),
+        anchor=tkinter.CENTER,
+        fill="white",
+        tags=["delete", "resumeButton"]
+    )
+
+    scoreboard(25, screen.height / 4, index, fill="white")
 
 def startGame(level = 0, reset=False):
     global f, sessionHighscore, submitted, index, totalF
@@ -369,7 +421,7 @@ def startGame(level = 0, reset=False):
                 player.rot = deathStartAngle + interval * ((f - 5 - deadFrame) / 10)
                 
             
-        if eventHandlers.mouse and not player.dead and f != 1:
+        if eventHandlers.mouse and not player.dead and not eventHandlers.paused and f != 1:
             eventHandlers.mouse = False
             if f - player.loadFrame > 10:
                 player.loadFrame = f
@@ -378,6 +430,9 @@ def startGame(level = 0, reset=False):
                     player.score += level
                     sessionHighscore = max(sessionHighscore, player.score)
                     
+        if eventHandlers.paused:
+            player.toRotate = 0
+            player.moveKeys = []
         player.target = None
         renderFrame(player.rays, f, level)
         player.move()
@@ -388,6 +443,9 @@ def startGame(level = 0, reset=False):
             else:
                 deathScreen(index)
 
+        elif eventHandlers.paused:
+            pauseMenu(index)
+
         # debug screen
         if debug:
             updateDebugScreen(totalF, start)
@@ -395,13 +453,14 @@ def startGame(level = 0, reset=False):
         screen.update()
         
         sleep(max(0, (start + 1 / fps * f) - time()))
-        screen.delete("delete")
-        f += 1
         totalF += 1
+        if not eventHandlers.paused:
+            f += 1
+        screen.delete("delete")
         if debug:
             screenD.delete("delete")
 
-        if door() and not player.dead:
+        if door() and not player.dead and not eventHandlers.paused:
             eventHandlers.localDoor = False
             startGame(level + 1)
 
