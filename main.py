@@ -295,6 +295,8 @@ def startGame(level = 0, reset=False):
     deadFrame = 0
     index = 0
 
+    root.focus_set()
+    screen.focus_set()
     
     start = time()
 
