@@ -16,12 +16,7 @@ import tkinter
 import eventHandlers
 from platform import system
 from eventHandlers import init as initEventHandlers, door
-
-try: 
-    from replit import db
-except Exception as e:
-    print(str(e) + "\nCouldn't connect to database, running in offline mode")
-    db = {"highscore": ("", 0)}
+from replit import db
 
 def renderFrame(rays: list[Ray], f, level):
     # playerHeightPercent = player.z / 64
@@ -233,7 +228,8 @@ def deathScreen(index, firstTime = False):
             screen.height / 4 - 100,
             screen.width / 2 + 175,
             screen.height / 4 + 100,
-            fill="gray50"
+            fill="gray50",
+            tags="delete"
         )
     
     else: 
@@ -291,7 +287,8 @@ def pauseMenu(index):
             screen.height / 4 - 100,
             screen.width / 2 + 175,
             screen.height / 4 + 100,
-            fill="gray50"
+            fill="gray50",
+            tags="delete"
         )
     
     else: 
@@ -465,11 +462,15 @@ def startGame(level = 0, reset=False):
             startGame(level + 1)
 
 def firstStart():
-    global osName, sessionHighscore, highscores, nameInput, totalF
-    if "highscores" not in db.keys():
-        db["highscores"] = [
-            (" ", 0)
-        ]
+    global osName, sessionHighscore, highscores, nameInput, totalF, db
+    try:
+        if "highscores" not in db.keys():
+            db["highscores"] = [
+                (" ", 0)
+            ]
+    except Exception as e:
+        print(str(e) + "\nCouldn't connect to database, running in offline mode")
+        db = {"highscore": ("", 0)}
     
     initEventHandlers()
     osName = system()
