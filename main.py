@@ -18,7 +18,7 @@ from platform import system
 from eventHandlers import init as initEventHandlers, door
 from replit import db
 
-def renderFrame(rays: list[Ray], f, level):
+def renderFrame(rays: list[Ray], f, level, intro=False):
     # playerHeightPercent = player.z / 64
     # baseline = screen.height - screen.height * playerHeightPercent
 
@@ -46,58 +46,59 @@ def renderFrame(rays: list[Ray], f, level):
         #     fill="blue",
         #     width=1
         # )
+    if not intro:
 
-    # sprites
-    for i in Sprite.instances:
-        i.draw(player, rays, f)
-
-    Sprite.instances.sort(key=lambda x: x.relDistance, reverse=True)
-        
-    # crosshair
-    screen.create_line(
-        screen.width // 2,
-        screen.height // 2 - 10,
-        screen.width // 2,
-        screen.height // 2 + 10,
-        fill="white",
-        tags=["delete", "deleteOnDeath"]
-    )
-    screen.create_line(
-        screen.width // 2 - 10,
-        screen.height // 2,
-        screen.width // 2 + 10,
-        screen.height // 2,
-        fill="white",
-        tags=["delete", "deleteOnDeath"]
-    )
-
-    # stamp in hand
-    if f - player.loadFrame > 10:
-        screen.create_image(screen.width, screen.height, anchor=tkinter.SE, image=stamper, tags="delete")
-
-    # score
-    screen.create_text(
-        screen.width - 15,
-        15,
-        anchor=tkinter.NE,
-        text=f"Score: {player.score}\nHigh Score: {sessionHighscore}\nLevel: {level}",
-        justify=tkinter.RIGHT,
-        font=("Dejavu Sans", 30),
-        fill="white",
-        tags=["delete", "deleteOnDeath"]
-    )
-
+        # sprites
+        for i in Sprite.instances:
+            i.draw(player, rays, f)
     
-    if round(player.x / 64) == mapInfo()[2][0] + 1 and floor(player.y / 64) == mapInfo()[2][1]:
-        screen.create_text(
-            screen.width / 2,
-            screen.height / 2 - 10,
-            text="Press E to enter",
+        Sprite.instances.sort(key=lambda x: x.relDistance, reverse=True)
+            
+        # crosshair
+        screen.create_line(
+            screen.width // 2,
+            screen.height // 2 - 10,
+            screen.width // 2,
+            screen.height // 2 + 10,
             fill="white",
-            font=("Dejavu Sans", 20),
-            anchor=tkinter.S,
             tags=["delete", "deleteOnDeath"]
         )
+        screen.create_line(
+            screen.width // 2 - 10,
+            screen.height // 2,
+            screen.width // 2 + 10,
+            screen.height // 2,
+            fill="white",
+            tags=["delete", "deleteOnDeath"]
+        )
+    
+        # stamp in hand
+        if f - player.loadFrame > 10:
+            screen.create_image(screen.width, screen.height, anchor=tkinter.SE, image=stamper, tags="delete")
+    
+        # score
+        screen.create_text(
+            screen.width - 15,
+            15,
+            anchor=tkinter.NE,
+            text=f"Score: {player.score}\nHigh Score: {sessionHighscore}\nLevel: {level}",
+            justify=tkinter.RIGHT,
+            font=("Dejavu Sans", 30),
+            fill="white",
+            tags=["delete", "deleteOnDeath"]
+        )
+    
+        
+        if round(player.x / 64) == mapInfo()[2][0] + 1 and floor(player.y / 64) == mapInfo()[2][1]:
+            screen.create_text(
+                screen.width / 2,
+                screen.height / 2 - 10,
+                text="Press E to enter",
+                fill="white",
+                font=("Dejavu Sans", 20),
+                anchor=tkinter.S,
+                tags=["delete", "deleteOnDeath"]
+            )
 
 
 def updateDebugScreen(f, start):
@@ -334,6 +335,115 @@ def pauseMenu(index):
 
     scoreboard(25, screen.height / 4, index, fill="white")
 
+def introScreen():
+    global osName, index, highscores, db
+
+    screen.tag_bind("firstStartButton", "<Button-1>", lambda e: firstStart())
+    # screen.tag_bind("optionsButton", "<Button-1>")
+    
+    try:
+        if "highscores" not in db.keys():
+            db["highscores"] = [
+                (" ", 0)
+            ]
+    except Exception as e:
+        print(str(e) + "\nCouldn't connect to database, running in offline mode")
+        db = {"highscores": [("", 0)]}
+    highscores = sorted(db["highscores"], key=lambda x: x[1], reverse=True)
+    
+    osName = system()
+
+    if osName in ["Darwin"]:
+        screen.bind("scoreboard", "<MouseWheel>", lambda e: updateIndex(-e.delta))
+    elif osName in ["Windows"]:
+        screen.bind("scoreboard", "<MouseWheel>", lambda e: updateIndex(-e.delta / 120))
+    else:
+        screen.tag_bind("scoreboard", "<Button-4>", lambda e: updateIndex(-1))
+        screen.tag_bind("scoreboard", "<Button-5>", lambda e: updateIndex(1))
+    
+    map.localMap = generateMap()
+    mapInfo = map.mapInfo()
+    player.x = mapInfo[1][0] * 64 + 8
+    player.y = mapInfo[1][1] * 64 + 32
+    player.toRotate = 1
+    f = 0
+    index = 0
+    
+    # sky
+    for i in range(100):
+        x = uniform(0, screen.width)
+        y = uniform(0, screen.height / 2)
+        size = uniform(2, 4)
+
+        screen.create_oval(
+            x,
+            y,
+            x + size,
+            y + size,
+            outline="",
+            fill="white"
+        )
+        
+    while True:
+        player.move()
+        renderFrame(player.rays, f, 0, intro=True)
+
+        if osName == "Darwin":
+            screen.create_rectangle(
+                screen.width / 2 - 175,
+                screen.height / 4 - 30,
+                screen.width / 2 + 175,
+                screen.height / 4 + 30,
+                fill="gray50",
+                tags="delete"
+            )
+        
+        else: 
+            screen.create_rectangle(
+                0,
+                0,
+                screen.width,
+                screen.height,
+                fill="black",
+                stipple="gray75",
+                tags="delete"
+            )
+        
+        screen.create_text(
+            screen.width / 2, 
+            screen.height / 4, 
+            anchor=tkinter.CENTER, 
+            fill="white", 
+            text="Mr. V Simulator", 
+            justify="center", 
+            tags="delete", 
+            font=("Dejavu Sans", 36)
+        )
+    
+        screen.create_rectangle(
+            screen.width / 2 - 200,
+            screen.height * 3 / 4 - 36,
+            screen.width / 2 + 200,
+            screen.height * 3 / 4 + 36,
+            fill="gray75",
+            stipple="gray75",
+            tags=["delete", "firstStartButton"]
+        )
+        screen.create_text(
+            screen.width / 2,
+            screen.height * 3 / 4,
+            text="Start game",
+            font=("Dejavu Sans", 36),
+            anchor=tkinter.CENTER,
+            fill="white",
+            tags=["delete", "firstStartButton"]
+        )
+    
+        scoreboard(25, screen.height / 4, index, fill="white")
+        screen.update()
+        sleep(0.1)
+        screen.delete("delete")
+        f += 1
 
 def startGame(level = 0, reset=False):
     global f, sessionHighscore, submitted, index, totalF
@@ -351,14 +461,6 @@ def startGame(level = 0, reset=False):
     eventHandlers.paused = False
     
     start = time()
-
-    if osName in ["Darwin"]:
-        screen.bind("scoreboard", "<MouseWheel>", lambda e: updateIndex(-e.delta))
-    elif osName in ["Windows"]:
-        screen.bind("scoreboard", "<MouseWheel>", lambda e: updateIndex(-e.delta / 120))
-    else:
-        screen.tag_bind("scoreboard", "<Button-4>", lambda e: updateIndex(-1))
-        screen.tag_bind("scoreboard", "<Button-5>", lambda e: updateIndex(1))
 
     if debug:
         consts.localScreenDScale = screenD.length / (64 * round(5 * log(level + 0.1, 10) + 13))
@@ -465,24 +567,14 @@ def startGame(level = 0, reset=False):
             startGame(level + 1)
 
 def firstStart():
-    global osName, sessionHighscore, highscores, nameInput, totalF, db
-    try:
-        if "highscores" not in db.keys():
-            db["highscores"] = [
-                (" ", 0)
-            ]
-    except Exception as e:
-        print(str(e) + "\nCouldn't connect to database, running in offline mode")
-        db = {"highscores": [("", 0)]}
+    global sessionHighscore, nameInput, totalF
     
     initEventHandlers()
-    osName = system()
     sessionHighscore = 0
     totalF = 1
-    highscores = sorted(db["highscores"], key=lambda x: x[1], reverse=True)
     nameInput = tkinter.Entry(root, width=15)
     screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(level=1, reset=True))
     startGame(reset=True)
 
-root.after(100, firstStart)
+root.after(100, introScreen)
 root.mainloop()
