@@ -334,6 +334,7 @@ def pauseMenu(index):
 
     scoreboard(25, screen.height / 4, index, fill="white")
 
+
 def startGame(level = 0, reset=False):
     global f, sessionHighscore, submitted, index, totalF
     screen.delete("all")
@@ -346,6 +347,7 @@ def startGame(level = 0, reset=False):
 
     root.focus_set()
     screen.focus_set()
+    eventHandlers.paused = False
     
     start = time()
 
@@ -442,7 +444,7 @@ def startGame(level = 0, reset=False):
 
         elif eventHandlers.paused:
             pauseMenu(index)
-
+  
         # debug screen
         if debug:
             updateDebugScreen(totalF, start)
