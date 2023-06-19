@@ -1,6 +1,6 @@
 from map import map
 from math import floor, ceil, tan, radians, sqrt, cos
-from consts import debug, screenD, screenDScale, screen, verticalPrecision, horizontalPrecision
+from consts import debug, screenD, screenDScale, screen, getVerticalPrecision, getHorizontalPrecision
 from colourUtils import rgbToHex
 
 class Ray:
@@ -97,6 +97,9 @@ class Ray:
         )
 
 def rayToSlice(i, ray, player, distance, texture, hitLocation):
+    horizontalPrecision = getHorizontalPrecision()
+    verticalPrecision = getVerticalPrecision()
+    
     playerHeightPercent = player.z / 64
     baseline = screen.height - screen.height * playerHeightPercent
     pixelHeight = 64 * screen.depth / distance / texture[1]

@@ -1,4 +1,4 @@
-from consts import screen
+from consts import screen, root
 from player import player, angles
 from math import floor
 from map import mapInfo
@@ -51,4 +51,4 @@ def init():
     screen.bind("<Motion>", onMouseMove)
     screen.bind("<Button-1>", onMousePress)
     screen.tag_bind("resumeButton", "<Button-1>", lambda e: onResume(e, False))
-    screen.bind("<FocusOut>", lambda e: onResume(e, True))
+    root.bind("<FocusOut>", lambda e: onResume(e, True))

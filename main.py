@@ -335,11 +335,97 @@ def pauseMenu(index):
 
     scoreboard(25, screen.height / 4, index, fill="white")
 
+def updateGraphics(value, returnFunction):
+    consts.precision = value
+    player.rays = [Ray(fov / screen.width * i - fov / 2) for i in range(0, screen.width, consts.getVerticalPrecision())]
+    optionsScreen(returnFunction)
+
+def optionsScreen(returnFunction):
+    screen.tag_bind("returnButton", "<Button-1>", lambda e: returnFunction())
+    screen.tag_bind("graphicsButton", "<Button-1>", lambda e: updateGraphics((consts.precision + 1) % len(consts.precisionPresets), returnFunction))
+
+    while True:
+        renderFrame(player.rays, 0, 0, intro=True)
+        
+        if osName == "Darwin":
+            screen.create_rectangle(
+                screen.width / 2 - 175,
+                screen.height / 4 - 30,
+                screen.width / 2 + 175,
+                screen.height / 4 + 30,
+                fill="gray50",
+                tags="delete"
+            )
+        
+        else: 
+            screen.create_rectangle(
+                0,
+                0,
+                screen.width,
+                screen.height,
+                fill="black",
+                stipple="gray75",
+                tags="delete"
+            )
+        
+        screen.create_text(
+            screen.width / 2, 
+            screen.height / 4, 
+            anchor=tkinter.CENTER, 
+            fill="white", 
+            text="Options", 
+            justify="center", 
+            tags="delete", 
+            font=("Dejavu Sans", 36)
+        )
+           
+        screen.create_rectangle(
+            screen.width / 2 - 400,
+            screen.height * 9 / 16 - 36,
+            screen.width / 2 + 400,
+            screen.height * 9 / 16 + 36,
+            fill="gray75",
+            stipple="gray75",
+            tags=["delete", "graphicsButton"]
+        )
+        screen.create_text(
+            screen.width / 2,
+            screen.height * 9 / 16,
+            text=f"Graphics: {list(consts.precisionPresets.keys())[consts.precision]}",
+            font=("Dejavu Sans", 36),
+            anchor=tkinter.CENTER,
+            fill="white",
+            tags=["delete", "graphicsButton"]
+        )
+            
+        screen.create_rectangle(
+            screen.width / 2 - 200,
+            screen.height * 3 / 4 - 36,
+            screen.width / 2 + 200,
+            screen.height * 3 / 4 + 36,
+            fill="gray75",
+            stipple="gray75",
+            tags=["delete", "returnButton"]
+        )
+        screen.create_text(
+            screen.width / 2,
+            screen.height * 3 / 4,
+            text="Return",
+            font=("Dejavu Sans", 36),
+            anchor=tkinter.CENTER,
+            fill="white",
+            tags=["delete", "returnButton"]
+        )
+
+        screen.update()
+        sleep(0.1)
+        screen.delete("delete")
+
 def introScreen():
     global osName, index, highscores, db
 
     screen.tag_bind("firstStartButton", "<Button-1>", lambda e: firstStart())
-    # screen.tag_bind("optionsButton", "<Button-1>")
+    screen.tag_bind("optionsButton", "<Button-1>", lambda e: optionsScreen(introScreen))
     
     try:
         if "highscores" not in db.keys():
@@ -365,7 +451,7 @@ def introScreen():
     mapInfo = map.mapInfo()
     player.x = mapInfo[1][0] * 64 + 8
     player.y = mapInfo[1][1] * 64 + 32
-    player.toRotate = 1
+    player.toRotate = 0.5
     f = 0
     index = 0
     
@@ -418,6 +504,25 @@ def introScreen():
             justify="center", 
             tags="delete", 
             font=("Dejavu Sans", 36)
+        )
+            
+        screen.create_rectangle(
+            screen.width / 2 - 200,
+            screen.height * 9 / 16 - 36,
+            screen.width / 2 + 200,
+            screen.height * 9 / 16 + 36,
+            fill="gray75",
+            stipple="gray75",
+            tags=["delete", "optionsButton"]
+        )
+        screen.create_text(
+            screen.width / 2,
+            screen.height * 9 / 16,
+            text="Options",
+            font=("Dejavu Sans", 36),
+            anchor=tkinter.CENTER,
+            fill="white",
+            tags=["delete", "optionsButton"]
         )
     
         screen.create_rectangle(
