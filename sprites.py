@@ -17,7 +17,7 @@ class Sprite:
         self.targetable = False
         self.__class__.instances.append(self)
         
-    def draw(self, player, rays):
+    def draw(self, player, rays, level):
         if debug:
             screenD.create_oval(
                 self.x * screenDScale() - self.width * screenDScale() / 2,
@@ -77,8 +77,8 @@ class Sprite:
 
         while initialCondition == (currentAngle > minAngle) and currentAngle != minAngle:
             index = floor((currentAngle + fov / 2) / (fov / (len(rays) - 1)))
-            if index < 0 or index >= len(rays):
-                print(index, len(rays), self.relAngle, currentAngle, minAngle)
+            # if index < 0 or index >= len(rays):
+            #     print(index, len(rays), self.relAngle, currentAngle, minAngle)
             ray = rays[index]
             sliceDepth = self.relDistance / cos(radians(currentAngle + self.relAngle))
             hitLocation = self.relDistance * tan(radians(currentAngle + self.relAngle))
@@ -87,7 +87,7 @@ class Sprite:
                 if index == floor((fov / 2) / (fov / (len(rays) - 1))) and self.targetable:
                     player.target = self
                 
-                rayToSlice(index, ray, player, sliceDepth, spriteTextureMap[self.sprite], hitLocation + self.width / 2)
+                rayToSlice(index, ray, player, sliceDepth, spriteTextureMap[self.sprite], hitLocation + self.width / 2, level)
 
                 if debug:
                     screenD.create_line(
@@ -137,7 +137,7 @@ class Assignment(Sprite):
         super().__init__(*[i * 64 + 32 for i in self.coords], 64, 1)
         self.targetable = True
 
-    def draw(self, player, rays, f):
+    def draw(self, player, rays, f, level):
         if not player.dead and f > 10:
             if not self.deathFrame:
                 # move
@@ -205,6 +205,6 @@ class Assignment(Sprite):
                 else:
                     self.sprite = 2
         
-        super().draw(player, rays)
+        super().draw(player, rays, level)
 
 # Assignment(2, 0)

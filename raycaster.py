@@ -2,6 +2,7 @@ from map import map
 from math import floor, ceil, tan, radians, sqrt, cos
 from consts import debug, screenD, screenDScale, screen, getVerticalPrecision, getHorizontalPrecision
 from colourUtils import rgbToHex
+from colorsys import rgb_to_hls, hls_to_rgb
 
 class Ray:
     def __init__(self, angle):
@@ -96,7 +97,7 @@ class Ray:
             map()[indexYVert][int(indexXVert)] if vertLength < horLength else map()[int(indexYHor)][indexXHor]
         )
 
-def rayToSlice(i, ray, player, distance, texture, hitLocation):
+def rayToSlice(i, ray, player, distance, texture, hitLocation, level):
     horizontalPrecision = getHorizontalPrecision()
     verticalPrecision = getVerticalPrecision()
     
@@ -107,13 +108,17 @@ def rayToSlice(i, ray, player, distance, texture, hitLocation):
 
     for j in range(0, texture[1], horizontalPrecision):
         pixel = texture[0][floor(hitLocation % 64 * (texture[1] / 64))][j]
+        color = list(rgb_to_hls(*pixel[:3]))
+        color[1] += -distance * (-3 / (max(level, 2) + 2) + 0.75)
+        color = rgbToHex(*[round(max(i, 0)) for i in hls_to_rgb(*color[:3])])
+        
         if pixel[3] != 0:
             screen.create_rectangle(
                 i * verticalPrecision,
                 top + pixelHeight * j,
                 i * verticalPrecision + verticalPrecision,
                 top + pixelHeight * j + pixelHeight * horizontalPrecision,
-                fill=rgbToHex(*pixel[:3]),
+                fill=color,
                 outline="",
                 tags="delete"
             )

@@ -35,7 +35,7 @@ def renderFrame(rays: list[Ray], f, intro=False):
     for i, ray in enumerate(rays):    
         hit = ray.getNearestWall(player.rot, player.x, player.y)
     
-        rayToSlice(i, ray, player, hit[0], textureMap[hit[2]], hit[1])
+        rayToSlice(i, ray, player, hit[0], textureMap[hit[2]], hit[1], level)
 
         # solid blue walls
         # screen.create_line(
@@ -50,7 +50,7 @@ def renderFrame(rays: list[Ray], f, intro=False):
 
         # sprites
         for i in Sprite.instances:
-            i.draw(player, rays, f)
+            i.draw(player, rays, f, level)
     
         Sprite.instances.sort(key=lambda x: x.relDistance, reverse=True)
             
@@ -380,7 +380,7 @@ def optionsScreen(returnFunction):
             screen.delete("delete")
 
 def introScreen():
-    global osName, index
+    global osName, index, level
 
     screen.tag_bind("firstStartButton", "<Button-1>", lambda e: firstStart())
     screen.tag_bind("optionsButton", "<Button-1>", lambda e: optionsScreen(introScreen))
@@ -398,6 +398,7 @@ def introScreen():
     player.x = mapInfo[1][0] * 64 + 8
     player.y = mapInfo[1][1] * 64 + 32
     player.toRotate = 0.5
+    level = 0
     f = 0
     index = 0
     

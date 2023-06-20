@@ -14,8 +14,8 @@ except FileNotFoundError as e:
     print(str(e) + "\nCouldn't open database, creating one for you")
     
     with open("./database.txt", "w") as f:
-        f.write("[('',0)]")
-    unsorted = [('',0)]
+        f.write("[['',0]]")
+    unsorted = [['',0]]
     highscores = unsorted
 
 submitted = False
@@ -95,7 +95,7 @@ def scoreboard(x, y, index, nameLength = 15, firstTime = False, inputScore=None,
 
 def submitScore(inputScore):
     global highscores, submitted
-    unsorted.append((nameInput.get(), inputScore))
+    unsorted.append([nameInput.get(), inputScore])
     highscores = sorted(unsorted, key=lambda x: x[1], reverse=True)
     
     with open("./database.txt", "w") as f:
