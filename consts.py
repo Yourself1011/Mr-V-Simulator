@@ -1,10 +1,15 @@
-from tkinter import Toplevel, Canvas, Tk
+from tkinter import Toplevel, Canvas, Tk, Entry
 from math import tan, radians
 from map import map
+from platform import system
 
 debug = False
 
 root = Tk()
+
+nameInput = Entry(root, width=15)
+
+osName = system()
 
 screenD = None
 screenDScale = None

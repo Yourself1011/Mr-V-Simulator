@@ -3,7 +3,7 @@ load_dotenv()
 
 from player import player
 import consts
-from consts import screen, root, debug, screenD, screenDScale, fps, fov
+from consts import screen, root, debug, screenD, screenDScale, fps, fov, osName
 from raycaster import Ray, rayToSlice
 import map
 from map import debugMap, generateMap, mapInfo
@@ -14,9 +14,9 @@ from time import sleep, time
 from random import uniform
 import tkinter
 import eventHandlers
-from platform import system
 from eventHandlers import init as initEventHandlers, door
-from replit import db
+import database
+from database import scoreboard, highscores
 
 def renderFrame(rays: list[Ray], f, level, intro=False):
     # playerHeightPercent = player.z / 64
@@ -138,87 +138,6 @@ def updateDebugScreen(f, start):
         tags = "delete"
     )
 
-
-def scoreboard(x, y, index, nameLength = 15, firstTime = False, inputScore=None, **kwargs):
-    scores = highscores[index:index+5]
-    if osName == "Darwin":
-        screen.create_rectangle(
-            x,
-            y - 12 * 5,
-            x + (nameLength + 2) * 12 + 6,
-            y + 12 * 5,
-            fill="gray50",
-            outline="",
-            tags=["scoreboard", "delete"]
-        )
-
-    else:
-        screen.create_rectangle(
-            x,
-            y - 12 * 5,
-            x + (nameLength + 2) * 12 + 6,
-            y + 12 * 5,
-            fill="",
-            outline="",
-            tags=["scoreboard", "delete"]
-        )
-
-    output = []
-    for j, i in enumerate(scores):
-        length = nameLength - len(str(j + index + 1))
-        output.append(f"{j + index + 1}. {i[0] if len(i[0]) <= length else i[0][:length-3] + '...'}{' ' * (length - len(i[0]))}  {i[1]}")
-
-    output = "\n".join(output)
-    
-    screen.create_text(
-        x,
-        y,
-        text="Leaderboard (scroll):\n" + output,
-        anchor=tkinter.W,
-        font=("Dejavu Sans Mono", 12),
-        tags=["scoreboard", "delete"],
-        **kwargs
-    )
-
-    if inputScore and not submitted:
-        if firstTime:
-            screen.create_window(x + 55, y + 12 * 6, anchor=tkinter.W, window=nameInput, tags="score")
-        screen.create_text(
-            x,
-            y + 12 * 6,
-            anchor=tkinter.W,
-            text="Name: ",
-            font=("Dejavu Sans Mono", 12),
-            fill="white",
-            tags="score"
-        )
-        screen.create_rectangle(
-            x + 190,
-            y + 12 * 6 - 12,
-            x + 260,
-            y + 12 * 6 + 12,
-            fill="gray75",
-            stipple="gray75",
-            tags=["scorebutton", "score"]
-        )
-        screen.create_text(
-            x + 225,
-            y + 12 * 6,
-            text="Submit",
-            fill="white",
-            font=("Dejavu Sans", 11),
-            tags=["scorebutton", "score"]
-        )
-
-        screen.tag_bind("scorebutton", "<Button-1>", lambda e: submitScore(inputScore))
-
-
-def submitScore(inputScore):
-    global highscores, submitted
-    db["highscores"].append((nameInput.get(), inputScore))
-    highscores = sorted(db["highscores"], key=lambda x: x[1], reverse=True)
-    screen.delete("score")
-    submitted=True
 
     
 def deathScreen(index, firstTime = False):
@@ -422,22 +341,10 @@ def optionsScreen(returnFunction):
         screen.delete("delete")
 
 def introScreen():
-    global osName, index, highscores, db
+    global osName, index
 
     screen.tag_bind("firstStartButton", "<Button-1>", lambda e: firstStart())
     screen.tag_bind("optionsButton", "<Button-1>", lambda e: optionsScreen(introScreen))
-    
-    try:
-        if "highscores" not in db.keys():
-            db["highscores"] = [
-                (" ", 0)
-            ]
-    except Exception as e:
-        print(str(e) + "\nCouldn't connect to database, running in offline mode")
-        db = {"highscores": [("", 0)]}
-    highscores = sorted(db["highscores"], key=lambda x: x[1], reverse=True)
-    
-    osName = system()
 
     if osName in ["Darwin"]:
         screen.bind("scoreboard", "<MouseWheel>", lambda e: updateIndex(-e.delta))
@@ -476,9 +383,17 @@ def introScreen():
 
         if osName == "Darwin":
             screen.create_rectangle(
-                screen.width / 2 - 175,
+                screen.width / 2 - 200,
                 screen.height / 4 - 30,
-                screen.width / 2 + 175,
+                screen.width / 2 + 200,
+                screen.height / 4 + 30,
+                fill="gray50",
+                tags="delete"
+            )
+            screen.create_rectangle(
+                screen.width * 7 / 8 - 100,
+                screen.height / 4 - 30,
+                screen.width * 7 / 8 + 100,
                 screen.height / 4 + 30,
                 fill="gray50",
                 tags="delete"
@@ -504,6 +419,17 @@ def introScreen():
             justify="center", 
             tags="delete", 
             font=("Dejavu Sans", 36)
+        )
+
+        screen.create_text(
+            screen.width * 7 / 8,
+            screen.height / 4,
+            anchor = tkinter.CENTER,
+            justify = tkinter.CENTER,
+            text="WASD\nMouse to rotate",
+            tags="delete",
+            fill="white",
+            font=("Dejavu Sans", 12)
         )
             
         screen.create_rectangle(
@@ -551,11 +477,11 @@ def introScreen():
         f += 1
 
 def startGame(level = 0, reset=False):
-    global f, sessionHighscore, submitted, index, totalF
+    global f, sessionHighscore, index, totalF
     screen.delete("all")
     Sprite.instances = []
     player.dead = False
-    submitted = False
+    database.submitted = False
     f = 1
     deadFrame = 0
     index = 0
@@ -672,12 +598,11 @@ def startGame(level = 0, reset=False):
             startGame(level + 1)
 
 def firstStart():
-    global sessionHighscore, nameInput, totalF
+    global sessionHighscore, totalF
     
     initEventHandlers()
     sessionHighscore = 0
     totalF = 1
-    nameInput = tkinter.Entry(root, width=15)
     screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(level=1, reset=True))
     startGame(reset=True)
 
