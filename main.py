@@ -296,14 +296,12 @@ def optionsScreen(returnFunction):
     def handleReturn():
         nonlocal running
         running = False
-        print(running)
         returnFunction()
     
     screen.tag_bind("returnButton", "<Button-1>", lambda e: handleReturn())
     screen.tag_bind("graphicsButton", "<Button-1>", lambda e: updateGraphics((consts.precision + 1) % len(consts.precisionPresets), returnFunction))
 
     while running:
-        print(running)
         renderFrame(player.rays, 0, intro=True)
         
         if osName == "Darwin":
