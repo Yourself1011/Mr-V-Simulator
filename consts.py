@@ -1,4 +1,4 @@
-from tkinter import Toplevel, Canvas, Tk, Entry
+from tkinter import Toplevel, Canvas, Tk
 from math import tan, radians
 from map import map
 from platform import system
@@ -6,8 +6,6 @@ from platform import system
 debug = False
 
 root = Tk()
-
-nameInput = Entry(root, width=15)
 
 osName = system()
 

@@ -1,6 +1,8 @@
 from json import loads, dumps
-from consts import osName, screen, nameInput
+from consts import osName, screen, root
 import tkinter
+
+nameInput = tkinter.Entry(root, width=15)
 
 try:
     with open("./database.txt", "r+") as f:
@@ -60,7 +62,6 @@ def scoreboard(x, y, index, nameLength = 15, firstTime = False, inputScore=None,
 
     if inputScore and not submitted:
         if firstTime:
-            print("SLDKFJ")
             screen.create_window(x + 55, y + 12 * 6, anchor=tkinter.W, window=nameInput, tags="score")
         screen.create_text(
             x,

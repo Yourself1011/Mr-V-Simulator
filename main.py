@@ -606,7 +606,7 @@ def startGame(levelParam, reset=False):
                     player.score += level
                     sessionHighscore = max(sessionHighscore, player.score)
                     
-        if eventHandlers.paused:
+        if eventHandlers.paused and f != 1:
             player.toRotate = 0
             player.moveKeys = []
         player.target = None
