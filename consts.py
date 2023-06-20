@@ -33,8 +33,9 @@ screen.depth = (screen.width / 2) / tan(radians(fov / 2))
 
 fps = 30
 
-precision = 1
+precision = 2
 precisionPresets = {
+    "replit": (25, 2),
     "potato": (15, 2),
     "normal": (10, 1),
     "good": (5, 1),

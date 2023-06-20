@@ -18,7 +18,7 @@ from eventHandlers import init as initEventHandlers, door
 import database
 from database import scoreboard, highscores
 
-def renderFrame(rays: list[Ray], f, level, intro=False):
+def renderFrame(rays: list[Ray], f, intro=False):
     # playerHeightPercent = player.z / 64
     # baseline = screen.height - screen.height * playerHeightPercent
 
@@ -201,70 +201,110 @@ def updateIndex(amount):
     index = max(min(index + amount, len(highscores) - 5), 0)
 
 def pauseMenu(index):
-    if osName == "Darwin":
-        screen.create_rectangle(
-            screen.width / 2 - 175,
-            screen.height / 4 - 100,
-            screen.width / 2 + 175,
-            screen.height / 4 + 100,
-            fill="gray50",
-            tags="delete"
+    screen.tag_bind("optionsButton", "<Button-1>", lambda e: optionsScreen(lambda: pauseMenu(index)))
+
+    while eventHandlers.paused:
+        renderFrame(player.rays, f)
+        if osName == "Darwin":
+            screen.create_rectangle(
+                screen.width / 2 - 175,
+                screen.height / 4 - 100,
+                screen.width / 2 + 175,
+                screen.height / 4 + 100,
+                fill="gray50",
+                tags="delete"
+            )
+        
+        else: 
+            screen.create_rectangle(
+                0,
+                0,
+                screen.width,
+                screen.height,
+                fill="black",
+                stipple="gray75",
+                tags="delete"
+            )
+        
+        screen.create_text(
+            screen.width / 2, 
+            screen.height / 4, 
+            anchor=tkinter.CENTER, 
+            fill="white", 
+            text=f"Game paused\nScore: {player.score}\nHigh Score: {sessionHighscore}", 
+            justify="center", 
+            tags="delete", 
+            font=("Dejavu Sans", 36)
         )
-    
-    else: 
+        
         screen.create_rectangle(
-            0,
-            0,
-            screen.width,
-            screen.height,
-            fill="black",
+            screen.width / 2 - 200,
+            screen.height * 9 / 16 - 36,
+            screen.width / 2 + 200,
+            screen.height * 9 / 16 + 36,
+            fill="gray75",
             stipple="gray75",
-            tags="delete"
+            tags=["delete", "optionsButton"]
+        )
+        screen.create_text(
+            screen.width / 2,
+            screen.height * 9 / 16,
+            text="Options",
+            font=("Dejavu Sans", 36),
+            anchor=tkinter.CENTER,
+            fill="white",
+            tags=["delete", "optionsButton"]
         )
     
-    screen.create_text(
-        screen.width / 2, 
-        screen.height / 4, 
-        anchor=tkinter.CENTER, 
-        fill="white", 
-        text=f"Game paused\nScore: {player.score}\nHigh Score: {sessionHighscore}", 
-        justify="center", 
-        tags="delete", 
-        font=("Dejavu Sans", 36)
-    )
+        screen.create_rectangle(
+            screen.width / 2 - 200,
+            screen.height * 3 / 4 - 36,
+            screen.width / 2 + 200,
+            screen.height * 3 / 4 + 36,
+            fill="gray75",
+            stipple="gray75",
+            tags=["delete", "resumeButton"]
+        )
+        screen.create_text(
+            screen.width / 2,
+            screen.height * 3 / 4,
+            text="Resume",
+            font=("Dejavu Sans", 36),
+            anchor=tkinter.CENTER,
+            fill="white",
+            tags=["delete", "resumeButton"]
+        )
+    
+        scoreboard(25, screen.height / 4, index, fill="white")
+        screen.update()
+        sleep(0.1)
+        if eventHandlers.paused:
+            screen.delete("delete")
 
-    screen.create_rectangle(
-        screen.width / 2 - 200,
-        screen.height * 3 / 4 - 36,
-        screen.width / 2 + 200,
-        screen.height * 3 / 4 + 36,
-        fill="gray75",
-        stipple="gray75",
-        tags=["delete", "resumeButton"]
-    )
-    screen.create_text(
-        screen.width / 2,
-        screen.height * 3 / 4,
-        text="Resume",
-        font=("Dejavu Sans", 36),
-        anchor=tkinter.CENTER,
-        fill="white",
-        tags=["delete", "resumeButton"]
-    )
-
-    scoreboard(25, screen.height / 4, index, fill="white")
-
-def updateGraphics(value, returnFunction):
-    consts.precision = value
-    player.rays = [Ray(fov / screen.width * i - fov / 2) for i in range(0, screen.width, consts.getVerticalPrecision())]
-    optionsScreen(returnFunction)
 
 def optionsScreen(returnFunction):
-    screen.tag_bind("returnButton", "<Button-1>", lambda e: returnFunction())
+    running = True
+
+    def updateGraphics(value, returnFunction):
+        nonlocal running
+        running = False
+        consts.precision = value
+        player.rays = [Ray(fov / screen.width * i - fov / 2) for i in range(0, screen.width, consts.getVerticalPrecision())]
+        screen.delete("delete")
+        optionsScreen(returnFunction)
+        
+    def handleReturn():
+        nonlocal running
+        running = False
+        print(running)
+        returnFunction()
+    
+    screen.tag_bind("returnButton", "<Button-1>", lambda e: handleReturn())
     screen.tag_bind("graphicsButton", "<Button-1>", lambda e: updateGraphics((consts.precision + 1) % len(consts.precisionPresets), returnFunction))
 
-    while True:
-        renderFrame(player.rays, 0, 0, intro=True)
+    while running:
+        print(running)
+        renderFrame(player.rays, 0, intro=True)
         
         if osName == "Darwin":
             screen.create_rectangle(
@@ -338,7 +378,8 @@ def optionsScreen(returnFunction):
 
         screen.update()
         sleep(0.1)
-        screen.delete("delete")
+        if running:
+            screen.delete("delete")
 
 def introScreen():
     global osName, index
@@ -379,7 +420,7 @@ def introScreen():
         
     while True:
         player.move()
-        renderFrame(player.rays, f, 0, intro=True)
+        renderFrame(player.rays, f, intro=True)
 
         if osName == "Darwin":
             screen.create_rectangle(
@@ -476,8 +517,10 @@ def introScreen():
         screen.delete("delete")
         f += 1
 
-def startGame(level = 0, reset=False):
-    global f, sessionHighscore, index, totalF
+def startGame(levelParam, reset=False):
+    global f, sessionHighscore, index, totalF, level
+    level = levelParam
+    
     screen.delete("all")
     Sprite.instances = []
     player.dead = False
@@ -487,7 +530,7 @@ def startGame(level = 0, reset=False):
     index = 0
 
     if reset:
-        root.focus_set()
+        # root.focus_set()
         screen.focus_set()
     eventHandlers.paused = False
     
@@ -567,7 +610,7 @@ def startGame(level = 0, reset=False):
             player.toRotate = 0
             player.moveKeys = []
         player.target = None
-        renderFrame(player.rays, f, level)
+        renderFrame(player.rays, f)
         player.move()
         
         if player.dead:
@@ -603,8 +646,8 @@ def firstStart():
     initEventHandlers()
     sessionHighscore = 0
     totalF = 1
-    screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(level=1, reset=True))
-    startGame(reset=True)
+    screen.tag_bind("startButton", "<Button-1>", lambda e: startGame(1, reset=True))
+    startGame(0, reset=True)
 
 root.after(100, introScreen)
 root.mainloop()
