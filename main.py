@@ -1,6 +1,3 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 from player import player
 import consts
 from consts import screen, root, debug, screenD, screenDScale, fps, fov, osName
@@ -10,7 +7,7 @@ from map import debugMap, generateMap, mapInfo
 from math import sin, cos, radians, log, floor
 from sprites import Sprite, Assignment
 from assets import textureMap, stamper
-from time import sleep, time
+from time import time
 from random import uniform
 import tkinter
 import eventHandlers
@@ -277,7 +274,8 @@ def pauseMenu(index):
     
         scoreboard(25, screen.height / 4, index, fill="white")
         screen.update()
-        sleep(0.1)
+        # sleep(0.1)
+        root.after(100)
         if eventHandlers.paused:
             screen.delete("delete")
 
@@ -375,7 +373,8 @@ def optionsScreen(returnFunction):
         )
 
         screen.update()
-        sleep(0.1)
+        # sleep(0.1)
+        root.after(100)
         if running:
             screen.delete("delete")
 
@@ -513,7 +512,8 @@ def introScreen():
     
         scoreboard(25, screen.height / 4, index, fill="white")
         screen.update()
-        sleep(0.1)
+        # sleep(0.1)
+        root.after(100)
         screen.delete("delete")
         f += 1
 
@@ -628,11 +628,12 @@ def startGame(levelParam, reset=False):
   
         # debug screen
         if debug:
-            updateDebugScreen(totalF, start)
+            updateDebugScreen(f, start)
         
         screen.update()
         
-        sleep(max(0, (start + 1 / fps * f) - time()))
+        # sleep(max(0, (start + 1 / fps * f) - time()))
+        root.after(round(max(0, (start + 1 / fps * f) - time())))
         totalF += 1
         if not eventHandlers.paused:
             f += 1
