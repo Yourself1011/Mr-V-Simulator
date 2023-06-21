@@ -526,7 +526,7 @@ def startGame(levelParam, reset=False):
     player.dead = False
     database.submitted = False
     if level > 2:
-        darknessMultiplier = 750 / (level - 2) + 96
+        darknessMultiplier = 500 / (level - 2) + 96
     else:
         darknessMultiplier = 0
     f = 1

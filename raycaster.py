@@ -2,8 +2,7 @@ from map import map
 from math import floor, ceil, tan, radians, sqrt, cos
 from consts import debug, screenD, screenDScale, screen, getVerticalPrecision, getHorizontalPrecision
 from colourUtils import rgbToHex
-from colorsys import rgb_to_hls, hls_to_rgb
-from asyncio import gather
+from colorsys import hls_to_rgb
 
 class Ray:
     def __init__(self, angle):
@@ -104,18 +103,20 @@ def rayToSlice(i, ray, player, distance, texture, hitLocation, darknessMultiplie
     
     playerHeightPercent = player.z / 64
     baseline = screen.height - screen.height * playerHeightPercent
-    pixelHeight = 64 * screen.depth / distance / texture[1]
-    top = baseline - (1 - playerHeightPercent) * pixelHeight * texture[1]
+    pixelHeight = 64 * screen.depth / distance / texture[2]
+    top = baseline - (1 - playerHeightPercent) * pixelHeight * texture[2]
         
-    for j in range(0, texture[1], horizontalPrecision):
-        pixel = texture[0][floor(hitLocation % 64 * (texture[1] / 64))][j]
+    for j in range(0, texture[2], horizontalPrecision):
+        column = floor(hitLocation % 64 * (texture[2] / 64))
+        pixel = texture[0][column][j]
+        hlsPixel = texture[1][column][j]
         
         if darknessMultiplier:
-            color = list(rgb_to_hls(*pixel[:3]))
+            color = list(hlsPixel[:3])
             # color[1] += -distance * (-3 / (max(level, 2) + 2) + 0.75)
             color[1] *= max(1 - (distance / darknessMultiplier), 0)
                 # (1000 / (level - 2) + 128)
-            color = rgbToHex(*[round(max(i, 0)) for i in hls_to_rgb(*color[:3])])
+            color = rgbToHex(*[round(x) for x in hls_to_rgb(*color[:3])])
             
         else:
             color = rgbToHex(*pixel[:3])

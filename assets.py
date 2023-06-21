@@ -1,4 +1,5 @@
 from PIL import Image, ImageTk
+from colorsys import rgb_to_hls
 
 textures = [
     Image.open("./assets/wall.png").convert("RGBA"), 
@@ -18,16 +19,19 @@ stamper = ImageTk.PhotoImage(image=Image.open("./assets/stamper.png").resize((25
 
 def deconstructImage(image):
     columns = []
+    hlsColumns = []
     pixels = list(image.getdata())
     length = texture.size[0]
     
     for i in range(length):
         columns.append([])
+        hlsColumns.append([])
         
     for i, v in enumerate(pixels):
         columns[i % length].append(v)
+        hlsColumns[i % length].append(rgb_to_hls(*v[:3]))
 
-    return (columns, length)
+    return (columns, hlsColumns, length)
     
 textureMap = [()]
 for texture in textures:
