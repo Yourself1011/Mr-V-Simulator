@@ -3,6 +3,7 @@ from math import floor, ceil, tan, radians, sqrt, cos
 from consts import debug, screenD, screenDScale, screen, getVerticalPrecision, getHorizontalPrecision
 from colourUtils import rgbToHex
 from colorsys import rgb_to_hls, hls_to_rgb
+from asyncio import gather
 
 class Ray:
     def __init__(self, angle):
@@ -97,7 +98,7 @@ class Ray:
             map()[indexYVert][int(indexXVert)] if vertLength < horLength else map()[int(indexYHor)][indexXHor]
         )
 
-def rayToSlice(i, ray, player, distance, texture, hitLocation, level):
+def rayToSlice(i, ray, player, distance, texture, hitLocation, darknessMultiplier):
     horizontalPrecision = getHorizontalPrecision()
     verticalPrecision = getVerticalPrecision()
     
@@ -105,12 +106,19 @@ def rayToSlice(i, ray, player, distance, texture, hitLocation, level):
     baseline = screen.height - screen.height * playerHeightPercent
     pixelHeight = 64 * screen.depth / distance / texture[1]
     top = baseline - (1 - playerHeightPercent) * pixelHeight * texture[1]
-
+        
     for j in range(0, texture[1], horizontalPrecision):
         pixel = texture[0][floor(hitLocation % 64 * (texture[1] / 64))][j]
-        color = list(rgb_to_hls(*pixel[:3]))
-        color[1] += -distance * (-3 / (max(level, 2) + 2) + 0.75)
-        color = rgbToHex(*[round(max(i, 0)) for i in hls_to_rgb(*color[:3])])
+        
+        if darknessMultiplier:
+            color = list(rgb_to_hls(*pixel[:3]))
+            # color[1] += -distance * (-3 / (max(level, 2) + 2) + 0.75)
+            color[1] *= max(1 - (distance / darknessMultiplier), 0)
+                # (1000 / (level - 2) + 128)
+            color = rgbToHex(*[round(max(i, 0)) for i in hls_to_rgb(*color[:3])])
+            
+        else:
+            color = rgbToHex(*pixel[:3])
         
         if pixel[3] != 0:
             screen.create_rectangle(

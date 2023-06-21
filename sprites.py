@@ -17,7 +17,7 @@ class Sprite:
         self.targetable = False
         self.__class__.instances.append(self)
         
-    def draw(self, player, rays, level):
+    def draw(self, player, rays, darknessMultiplier):
         if debug:
             screenD.create_oval(
                 self.x * screenDScale() - self.width * screenDScale() / 2,
@@ -87,7 +87,7 @@ class Sprite:
                 if index == floor((fov / 2) / (fov / (len(rays) - 1))) and self.targetable:
                     player.target = self
                 
-                rayToSlice(index, ray, player, sliceDepth, spriteTextureMap[self.sprite], hitLocation + self.width / 2, level)
+                rayToSlice(index, ray, player, sliceDepth, spriteTextureMap[self.sprite], hitLocation + self.width / 2, darknessMultiplier)
 
                 if debug:
                     screenD.create_line(

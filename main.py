@@ -35,7 +35,7 @@ def renderFrame(rays: list[Ray], f, intro=False):
     for i, ray in enumerate(rays):    
         hit = ray.getNearestWall(player.rot, player.x, player.y)
     
-        rayToSlice(i, ray, player, hit[0], textureMap[hit[2]], hit[1], level)
+        rayToSlice(i, ray, player, hit[0], textureMap[hit[2]], hit[1], darknessMultiplier)
 
         # solid blue walls
         # screen.create_line(
@@ -50,7 +50,7 @@ def renderFrame(rays: list[Ray], f, intro=False):
 
         # sprites
         for i in Sprite.instances:
-            i.draw(player, rays, f, level)
+            i.draw(player, rays, f, darknessMultiplier)
     
         Sprite.instances.sort(key=lambda x: x.relDistance, reverse=True)
             
@@ -380,7 +380,7 @@ def optionsScreen(returnFunction):
             screen.delete("delete")
 
 def introScreen():
-    global osName, index, level
+    global osName, index, level, darknessMultiplier
 
     screen.tag_bind("firstStartButton", "<Button-1>", lambda e: firstStart())
     screen.tag_bind("optionsButton", "<Button-1>", lambda e: optionsScreen(introScreen))
@@ -398,6 +398,7 @@ def introScreen():
     player.x = mapInfo[1][0] * 64 + 8
     player.y = mapInfo[1][1] * 64 + 32
     player.toRotate = 0.5
+    darknessMultiplier = 0
     level = 0
     f = 0
     index = 0
@@ -517,13 +518,17 @@ def introScreen():
         f += 1
 
 def startGame(levelParam, reset=False):
-    global f, sessionHighscore, index, totalF, level
+    global f, sessionHighscore, index, totalF, level, darknessMultiplier
     level = levelParam
     
     screen.delete("all")
     Sprite.instances = []
     player.dead = False
     database.submitted = False
+    if level > 2:
+        darknessMultiplier = 750 / (level - 2) + 96
+    else:
+        darknessMultiplier = 0
     f = 1
     deadFrame = 0
     index = 0
