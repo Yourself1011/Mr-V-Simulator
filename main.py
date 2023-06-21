@@ -466,7 +466,7 @@ def introScreen():
             screen.height / 4,
             anchor = tkinter.CENTER,
             justify = tkinter.CENTER,
-            text="WASD\nMouse to rotate",
+            text="WASD to move\nMouse to rotate\nClick to stamp",
             tags="delete",
             fill="white",
             font=("Dejavu Sans", 12)
