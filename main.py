@@ -16,6 +16,7 @@ import database
 from database import scoreboard, highscores
 
 def renderFrame(rays: list[Ray], f, intro=False):
+    """Draw the current game state"""
     # playerHeightPercent = player.z / 64
     # baseline = screen.height - screen.height * playerHeightPercent
 
@@ -194,6 +195,7 @@ def deathScreen(index, firstTime = False):
 
 
 def updateIndex(amount):
+    # update the leaderboard index on scroll
     global index
     index = max(min(index + amount, len(highscores) - 5), 0)
 
@@ -466,7 +468,7 @@ def introScreen():
             screen.height / 4,
             anchor = tkinter.CENTER,
             justify = tkinter.CENTER,
-            text="WASD to move\nMouse to rotate\nClick to stamp",
+            text="WASD: move\nMouse: rotate (joystick-like)\nClick: stamp",
             tags="delete",
             fill="white",
             font=("Dejavu Sans", 12)
@@ -518,6 +520,7 @@ def introScreen():
         f += 1
 
 def startGame(levelParam, reset=False):
+    """New level"""
     global f, sessionHighscore, index, totalF, level, darknessMultiplier
     level = levelParam
     

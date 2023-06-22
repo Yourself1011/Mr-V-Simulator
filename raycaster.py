@@ -15,7 +15,7 @@ class Ray:
         absAngle = (self.angle - offsetAngle + 180) % 360
         relAngle = self.angle % 360
         
-        # vertical walls
+        # get the closest vertical wall
         vertLength = 999999
         if absAngle != 180 and absAngle != 0:
             innerAngle = radians(((self.angle - offsetAngle) - 90) % 360)
@@ -40,7 +40,7 @@ class Ray:
             
             vertLength = sqrt(totalRunVert ** 2 + totalRiseVert ** 2)
 
-        # Horizontal walls
+        # get the closest horizontal wall
         
         horLength = 999999
         if absAngle != 90 and absAngle != 270:
@@ -98,6 +98,7 @@ class Ray:
         )
 
 def rayToSlice(i, ray, player, distance, texture, hitLocation, darknessMultiplier):
+    """Converts a ray hit and a texture to a vertical line, and draws it to the screen"""
     horizontalPrecision = getHorizontalPrecision()
     verticalPrecision = getVerticalPrecision()
     
