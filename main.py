@@ -433,9 +433,9 @@ def introScreen():
                 tags="delete"
             )
             screen.create_rectangle(
-                screen.width * 7 / 8 - 100,
+                screen.width * 7 / 8 - 125,
                 screen.height / 4 - 30,
-                screen.width * 7 / 8 + 100,
+                screen.width * 7 / 8 + 125,
                 screen.height / 4 + 30,
                 fill="gray50",
                 tags="delete"
@@ -468,7 +468,7 @@ def introScreen():
             screen.height / 4,
             anchor = tkinter.CENTER,
             justify = tkinter.CENTER,
-            text="WASD: move\nMouse: rotate (joystick-like)\nClick: stamp",
+            text="WASD: move\nMouse: rotate (joystick-like)\nClick: stamp\nP/esc: pause",
             tags="delete",
             fill="white",
             font=("Dejavu Sans", 12)
