@@ -29,7 +29,7 @@ screen.height = 540
 fov = 85
 screen.depth = (screen.width / 2) / tan(radians(fov / 2))
 
-fps = 30
+fps = 5
 
 precision = 2
 precisionPresets = {
@@ -37,7 +37,7 @@ precisionPresets = {
     "potato": (15, 2),
     "normal": (10, 1),
     "good": (5, 1),
-    "cpukiller6900": (1, 1)
+    "cpukiller6900": (1, 1),
 }
 
 getVerticalPrecision = lambda: list(precisionPresets.values())[precision][0]
