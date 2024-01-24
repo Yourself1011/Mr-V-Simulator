@@ -29,7 +29,7 @@ screen.height = 540
 fov = 85
 screen.depth = (screen.width / 2) / tan(radians(fov / 2))
 
-fps = 5
+fps = 15
 
 precision = 2
 precisionPresets = {
